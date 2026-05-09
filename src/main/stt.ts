@@ -13,6 +13,7 @@ let client: DeepgramClient | null = null
 let socket: any = null
 let listener: SttListener | null = null
 let apiKey: string = ''
+let pendingChunks: Buffer[] = []
 
 export function setSttListener(l: SttListener | null): void {
   listener = l
@@ -23,14 +24,25 @@ export function initSTT(key: string): void {
   client = new DeepgramClient({ apiKey: key })
 }
 
+function flushPending(): void {
+  if (!socket || socket.readyState !== 1) return
+  for (const chunk of pendingChunks) {
+    socket.sendMedia(chunk.buffer.slice(chunk.byteOffset, chunk.byteOffset + chunk.byteLength))
+  }
+  pendingChunks = []
+}
+
 export async function startTranscription(): Promise<void> {
   if (!client) {
     listener?.onError?.(new Error('Deepgram client not initialized'))
     return
   }
 
+  pendingChunks = []
+
   try {
-    const conn = await client.listen.v2.connect({
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const conn: any = await client.listen.v2.connect({
       model: 'flux-general-multi',
       encoding: 'linear16',
       sample_rate: SAMPLE_RATE,
@@ -43,21 +55,25 @@ export async function startTranscription(): Promise<void> {
 
     conn.on('open', () => {
       console.log('[stt] websocket connected')
+      flushPending()
     })
 
-    conn.on('message', (msg: { type: string; transcript?: string; event?: string }) => {
-      if (msg.type === 'TurnInfo') {
-        const text = msg.transcript?.trim() || ''
-        if (!text) return
+    conn.on(
+      'message',
+      (msg: { type: string; transcript?: string; event?: string }) => {
+        if (msg.type === 'TurnInfo') {
+          const text = msg.transcript?.trim() || ''
+          if (!text) return
 
-        if (msg.event === 'EndOfTurn' || msg.event === 'EagerEndOfTurn') {
-          console.log('[stt] final:', text)
-          listener?.onFinal?.(text)
-        } else {
-          listener?.onInterim?.(text)
+          if (msg.event === 'EndOfTurn' || msg.event === 'EagerEndOfTurn') {
+            console.log('[stt] final:', text)
+            listener?.onFinal?.(text)
+          } else {
+            listener?.onInterim?.(text)
+          }
         }
       }
-    })
+    )
 
     conn.on('error', (err: Error) => {
       console.error('[stt] error:', err)
@@ -78,16 +94,23 @@ export async function startTranscription(): Promise<void> {
 }
 
 export function sendAudioChunk(chunk: Buffer): void {
-  if (socket && socket.readyState === 1) {
+  if (!socket) {
+    pendingChunks.push(chunk)
+    return
+  }
+  if (socket.readyState === 1) {
     try {
       socket.sendMedia(chunk.buffer.slice(chunk.byteOffset, chunk.byteOffset + chunk.byteLength))
     } catch {
       // ignore send errors during shutdown
     }
+  } else {
+    pendingChunks.push(chunk)
   }
 }
 
 export function stopTranscription(): void {
+  pendingChunks = []
   if (socket) {
     try {
       socket.sendCloseStream({ type: 'CloseStream' })
