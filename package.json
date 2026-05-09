@@ -6,6 +6,7 @@
     "packages/*"
   ],
   "scripts": {
+    "postinstall": "node node_modules/electron/install.js 2>/dev/null || true",
     "dev": "npm run dev -w apps/desktop",
     "build": "npm run build -w apps/desktop",
     "typecheck": "npm run typecheck -w apps/desktop",
