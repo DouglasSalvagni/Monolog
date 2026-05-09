@@ -16,7 +16,7 @@
 
 **Purpose**: Project initialization — install audio capture library
 
-- [ ] T001 Add naudiodon v2.3.6 to dependencies in package.json (npm install naudiodon@2.3.6)
+- [X] T001 Add naudiodon v2.3.6 to dependencies in package.json (npm install naudiodon@2.3.6)
 
 ---
 
@@ -26,7 +26,7 @@
 
 **⚠️ CRITICAL**: No user story work can begin until this phase is complete
 
-- [ ] T002 Create src/main/audio-capture.ts with AudioCaptureSession class wrapping naudiodon AudioIO — start(), stop(), getBuffer(), getDevices(), audio level callback
+- [X] T002 Create src/main/audio-capture.ts with AudioCaptureSession class wrapping naudiodon AudioIO — start(), stop(), getBuffer(), getDevices(), audio level callback
 
 **Checkpoint**: Audio capture module ready — can enumerate devices and start/stop capture from Main Process
 
