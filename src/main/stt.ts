@@ -1,4 +1,4 @@
-import { DeepgramClient } from '@deepgram/sdk'
+import WebSocket from 'ws'
 
 export type SttListener = {
   onInterim?: (text: string) => void
@@ -8,10 +8,9 @@ export type SttListener = {
 
 const SAMPLE_RATE = 16000
 
-let client: DeepgramClient | null = null
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-let socket: any = null
+let ws: WebSocket | null = null
 let listener: SttListener | null = null
+let apiKey: string = ''
 let pendingChunks: Buffer[] = []
 
 export function setSttListener(l: SttListener | null): void {
@@ -19,74 +18,79 @@ export function setSttListener(l: SttListener | null): void {
 }
 
 export function initSTT(key: string): void {
-  client = new DeepgramClient({ apiKey: key })
+  apiKey = key
 }
 
-function flushPending(): void {
-  if (!socket || socket.readyState !== 1) return
-  for (const chunk of pendingChunks) {
-    socket.sendMedia(chunk.buffer.slice(chunk.byteOffset, chunk.byteOffset + chunk.byteLength))
-  }
-  pendingChunks = []
+function buildUrl(): string {
+  const params = new URLSearchParams({
+    model: 'nova-2',
+    language: 'pt',
+    encoding: 'linear16',
+    sample_rate: String(SAMPLE_RATE),
+    channels: '1',
+    smart_format: 'true',
+    punctuate: 'true',
+    interim_results: 'true',
+    endpointing: '200'
+  })
+  return `wss://api.deepgram.com/v1/listen?${params.toString()}`
 }
 
-export async function startTranscription(): Promise<void> {
-  if (!client) {
-    listener?.onError?.(new Error('Deepgram client not initialized'))
-    return
-  }
-
+export function startTranscription(): void {
   pendingChunks = []
 
   try {
-    const conn: any = await client.listen.v2.connect({
-      model: 'flux-general-multi',
-      encoding: 'linear16',
-      sample_rate: SAMPLE_RATE,
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      Authorization: '' as any,
-      queryParams: {
-        smart_format: 'true',
-        punctuate: 'true',
-        interim_results: 'true'
-      }
+    const url = buildUrl()
+    ws = new WebSocket(url, {
+      headers: { Authorization: `Token ${apiKey}` }
     })
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    socket = conn as any
-
-    conn.on('open', () => {
+    ws.on('open', () => {
       console.log('[stt] websocket connected')
-      flushPending()
+      for (const chunk of pendingChunks) {
+        ws?.send(chunk)
+      }
+      pendingChunks = []
     })
 
-    conn.on('message', (msg: Record<string, unknown>) => {
-      console.log('[stt] msg type:', msg.type, 'event:', (msg as { event?: string }).event)
-      if (msg.type === 'TurnInfo') {
-        const text = ((msg as { transcript?: string }).transcript || '').trim()
-        if (!text) return
+    ws.on('message', (data: WebSocket.Data) => {
+      try {
+        const msg = JSON.parse(data.toString())
+        console.log(
+          '[stt] msg type:',
+          msg.type,
+          'event:',
+          msg.channel?.alternatives?.[0]?.transcript?.slice(0, 50)
+        )
 
-        const event = (msg as { event?: string }).event
-        if (event === 'EndOfTurn' || event === 'EagerEndOfTurn') {
-          console.log('[stt] final:', text)
-          listener?.onFinal?.(text)
-        } else {
-          listener?.onInterim?.(text)
+        if (msg.type === 'Results') {
+          const alt = msg.channel?.alternatives?.[0]
+          if (!alt) return
+          const text = (alt.transcript || '').trim()
+          if (!text) return
+
+          if (alt.is_final) {
+            console.log('[stt] final:', text)
+            listener?.onFinal?.(text)
+          } else {
+            listener?.onInterim?.(text)
+          }
         }
+      } catch {
+        // ignore parse errors
       }
     })
 
-    conn.on('error', (err: Error) => {
-      console.error('[stt] error:', err)
-      listener?.onError?.(err instanceof Error ? err : new Error(String(err)))
+    ws.on('error', (err: Error) => {
+      console.error('[stt] error:', err.message)
+      listener?.onError?.(err)
     })
 
-    conn.on('close', () => {
-      console.log('[stt] websocket closed')
-      socket = null
+    ws.on('close', (code: number, reason: string) => {
+      console.log(`[stt] websocket closed (${code}): ${reason}`)
+      ws = null
     })
 
-    conn.connect()
     console.log('[stt] transcription started')
   } catch (err) {
     const error = err instanceof Error ? err : new Error('Failed to start transcription')
@@ -96,13 +100,13 @@ export async function startTranscription(): Promise<void> {
 }
 
 export function sendAudioChunk(chunk: Buffer): void {
-  if (!socket) {
+  if (!ws) {
     pendingChunks.push(chunk)
     return
   }
-  if (socket.readyState === 1) {
+  if (ws.readyState === WebSocket.OPEN) {
     try {
-      socket.sendMedia(chunk.buffer.slice(chunk.byteOffset, chunk.byteOffset + chunk.byteLength))
+      ws.send(chunk)
     } catch {
       // ignore send errors during shutdown
     }
@@ -113,19 +117,17 @@ export function sendAudioChunk(chunk: Buffer): void {
 
 export function stopTranscription(): void {
   pendingChunks = []
-  if (socket) {
+  if (ws) {
     try {
-      socket.sendCloseStream({ type: 'CloseStream' })
-      socket.close()
+      ws.close()
     } catch {
       // best effort cleanup
     }
-    socket = null
+    ws = null
   }
 }
 
 export function cleanupSTT(): void {
   stopTranscription()
-  client = null
   listener = null
 }
