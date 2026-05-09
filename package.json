@@ -26,6 +26,7 @@
     "@electron-toolkit/utils": "^4.0.0",
     "dotenv": "^17.4.2",
     "naudiodon": "file:./vendor/naudiodon-patched-2.3.6.tgz",
+    "openai": "^6.37.0",
     "uiohook-napi": "^1.5.5",
     "zustand": "^5.0.13"
   },

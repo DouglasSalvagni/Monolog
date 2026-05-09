@@ -10,8 +10,10 @@ function App(): React.JSX.Element {
   const setError = useRecordingStore((s) => s.setError)
   const setInterimText = useRecordingStore((s) => s.setInterimText)
   const setFinalText = useRecordingStore((s) => s.setFinalText)
-  const clearFinalText = useRecordingStore((s) => s.clearFinalText)
+  const setRefinedText = useRecordingStore((s) => s.setRefinedText)
+  const clearResult = useRecordingStore((s) => s.clearResult)
   const finalText = useRecordingStore((s) => s.finalText)
+  const refinedText = useRecordingStore((s) => s.refinedText)
   const isIdle = status === 'idle'
   const isRecording = status === 'recording'
   const hasIPC = typeof window.api?.toggleRecording === 'function'
@@ -73,7 +75,17 @@ function App(): React.JSX.Element {
     if (window.api.onTranscriptionFinal) {
       cleanups.push(
         window.api.onTranscriptionFinal((text) => {
+          console.log('[renderer] final transcript:', text)
           setFinalText(text)
+        })
+      )
+    }
+
+    if (window.api.onTranscriptionRefined) {
+      cleanups.push(
+        window.api.onTranscriptionRefined((refined) => {
+          console.log('[renderer] refined:', refined)
+          setRefinedText(refined)
         })
       )
     }
@@ -81,14 +93,24 @@ function App(): React.JSX.Element {
     return () => {
       cleanups.forEach((c) => c())
     }
-  }, [hasIPC, startRecording, stopRecording, setAudioLevel, setError, setInterimText, setFinalText])
+  }, [
+    hasIPC,
+    startRecording,
+    stopRecording,
+    setAudioLevel,
+    setError,
+    setInterimText,
+    setFinalText,
+    setRefinedText
+  ])
 
   const handleCopy = (): void => {
-    if (!finalText) return
+    const text = refinedText || finalText
+    if (!text) return
     if (hasIPC) {
-      window.api.writeClipboard(finalText)
+      window.api.writeClipboard(text)
     } else {
-      navigator.clipboard.writeText(finalText).catch(console.error)
+      navigator.clipboard.writeText(text).catch(console.error)
     }
   }
 
@@ -111,6 +133,8 @@ function App(): React.JSX.Element {
       }
     }
   }
+
+  const showResult = isIdle && finalText
 
   return (
     <div className="flex h-screen w-screen select-none flex-col items-center justify-center bg-gray-50">
@@ -145,12 +169,45 @@ function App(): React.JSX.Element {
           {isIdle ? 'Start Recording' : 'Stop Recording'}
         </button>
 
-        {isIdle && finalText && (
-          <div className="w-full bg-white rounded-lg border border-gray-200 shadow-sm p-4">
-            <p className="text-sm text-gray-700 leading-relaxed whitespace-pre-wrap break-words">
-              {finalText}
-            </p>
-            <div className="flex gap-2 mt-3 pt-3 border-t border-gray-100">
+        {showResult && (
+          <div className="w-full space-y-3">
+            <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-4">
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-xs font-medium text-gray-400 uppercase tracking-wide">
+                  {refinedText ? 'Refined' : 'Processing...'}
+                </span>
+                {!refinedText && (
+                  <span className="h-3 w-3 rounded-full bg-yellow-400 animate-pulse" />
+                )}
+              </div>
+              <p className="text-sm text-gray-700 leading-relaxed whitespace-pre-wrap break-words">
+                {refinedText || finalText}
+              </p>
+              {!refinedText && (
+                <div className="mt-2 flex gap-1">
+                  <div className="h-1 flex-1 rounded-full bg-blue-400 animate-pulse" />
+                  <div
+                    className="h-1 flex-1 rounded-full bg-blue-400 animate-pulse"
+                    style={{ animationDelay: '0.2s' }}
+                  />
+                  <div
+                    className="h-1 flex-1 rounded-full bg-blue-400 animate-pulse"
+                    style={{ animationDelay: '0.4s' }}
+                  />
+                </div>
+              )}
+            </div>
+
+            {finalText && refinedText && finalText !== refinedText && (
+              <details className="bg-white rounded-lg border border-gray-200 shadow-sm p-4">
+                <summary className="text-xs font-medium text-gray-400 cursor-pointer">
+                  Raw transcript
+                </summary>
+                <p className="mt-2 text-sm text-gray-500 leading-relaxed">{finalText}</p>
+              </details>
+            )}
+
+            <div className="flex gap-2">
               <button
                 onClick={handleCopy}
                 className="flex items-center gap-1 rounded-md bg-blue-500 px-3 py-1.5 text-xs font-medium text-white hover:bg-blue-600 transition-colors active:scale-95"
@@ -158,7 +215,7 @@ function App(): React.JSX.Element {
                 Copy
               </button>
               <button
-                onClick={clearFinalText}
+                onClick={clearResult}
                 className="rounded-md bg-gray-100 px-3 py-1.5 text-xs font-medium text-gray-600 hover:bg-gray-200 transition-colors"
               >
                 Clear

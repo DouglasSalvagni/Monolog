@@ -12,13 +12,15 @@ interface RecordingState {
   audioLevel: number
   interimText: string
   finalText: string | null
+  refinedText: string | null
   error: AudioErrorState | null
   startRecording: () => void
   stopRecording: () => void
   setAudioLevel: (level: number) => void
   setInterimText: (text: string) => void
   setFinalText: (text: string) => void
-  clearFinalText: () => void
+  setRefinedText: (text: string) => void
+  clearResult: () => void
   setError: (error: AudioErrorState | null) => void
   resetToIdle: () => void
 }
@@ -28,9 +30,17 @@ export const useRecordingStore = create<RecordingState>((set) => ({
   audioLevel: 0,
   interimText: '',
   finalText: null,
+  refinedText: null,
   error: null,
 
-  startRecording: () => set({ status: 'recording', error: null, interimText: '', finalText: null }),
+  startRecording: () =>
+    set({
+      status: 'recording',
+      error: null,
+      interimText: '',
+      finalText: null,
+      refinedText: null
+    }),
 
   stopRecording: () => set({ status: 'idle', audioLevel: 0, interimText: '' }),
 
@@ -40,7 +50,9 @@ export const useRecordingStore = create<RecordingState>((set) => ({
 
   setFinalText: (text: string) => set({ finalText: text }),
 
-  clearFinalText: () => set({ finalText: null }),
+  setRefinedText: (text: string) => set({ refinedText: text }),
+
+  clearResult: () => set({ finalText: null, refinedText: null }),
 
   setError: (error: AudioErrorState | null) => set({ error, status: error ? 'idle' : 'idle' }),
 
@@ -50,6 +62,7 @@ export const useRecordingStore = create<RecordingState>((set) => ({
       audioLevel: 0,
       interimText: '',
       finalText: null,
+      refinedText: null,
       error: null
     })
 }))

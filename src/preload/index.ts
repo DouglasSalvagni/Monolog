@@ -49,6 +49,13 @@ const api = {
     return () => ipcRenderer.removeListener('transcription:final', handler)
   },
 
+  onTranscriptionRefined: (callback: (refined: string) => void): (() => void) => {
+    const handler = (_event: Electron.IpcRendererEvent, payload: { refined: string }): void =>
+      callback(payload.refined)
+    ipcRenderer.on('transcription:refined', handler)
+    return () => ipcRenderer.removeListener('transcription:refined', handler)
+  },
+
   showWindow: (): void => ipcRenderer.send('app:show-window'),
 
   quitApp: (): void => ipcRenderer.send('app:quit'),

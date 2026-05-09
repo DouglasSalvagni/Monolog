@@ -96,7 +96,16 @@ app.whenReady().then(() => {
   if (!apiKey) {
     console.warn('[main] DEEPGRAM_API_KEY not set — transcription disabled')
   }
-  initRecording(apiKey || '')
+
+  const llmKey = process.env['OPENAI_API_KEY']
+  const llmBase = process.env['OPENAI_BASE_URL']
+  const llmModel = process.env['OPENAI_MODEL']
+
+  initRecording(apiKey || '', {
+    apiKey: llmKey || '',
+    baseUrl: llmBase || undefined,
+    model: llmModel || undefined
+  })
   createWindow()
   createTray()
   setTrayIdle()

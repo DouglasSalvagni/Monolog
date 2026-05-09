@@ -13,6 +13,7 @@ interface RecordingApi {
   onAudioError: (callback: (error: AudioErrorPayload) => void) => () => void
   onTranscriptionInterim: (callback: (text: string) => void) => () => void
   onTranscriptionFinal: (callback: (text: string) => void) => () => void
+  onTranscriptionRefined: (callback: (refined: string) => void) => () => void
   showWindow: () => void
   quitApp: () => void
   writeClipboard: (text: string) => void

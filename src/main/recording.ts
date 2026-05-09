@@ -17,6 +17,7 @@ import {
   cleanupSTT,
   initSTT
 } from './stt'
+import { initRefine, refineText, cleanupRefine } from './refine'
 
 let mainWindow: BrowserWindow | null = null
 
@@ -43,9 +44,20 @@ function onInterim(text: string): void {
 }
 
 function onFinal(text: string): void {
-  clipboard.writeText(text)
   console.log(`[recording] final: "${text}"`)
   send('transcription:final', { text })
+
+  refineText(text)
+    .then((refined) => {
+      clipboard.writeText(refined)
+      console.log(`[recording] refined: "${refined}"`)
+      send('transcription:refined', { refined })
+    })
+    .catch((err) => {
+      console.error('[recording] refinement failed:', err.message)
+      clipboard.writeText(text)
+      send('transcription:refined', { refined: text })
+    })
 }
 
 function onAudioError(error: AudioErrorPayload): void {
@@ -58,8 +70,12 @@ function onSttError(error: Error): void {
   send('audio:error', { message: error.message, code: 'STREAM_ERROR' })
 }
 
-export function initRecording(apiKey: string): void {
-  initSTT(apiKey)
+export function initRecording(
+  sttKey: string,
+  refineConfig: { apiKey: string; baseUrl?: string; model?: string }
+): void {
+  initSTT(sttKey)
+  initRefine(refineConfig)
 
   setSttListener({
     onInterim,
@@ -101,4 +117,5 @@ export function resetRecording(): void {
   stopTranscription()
   cleanupCapture()
   cleanupSTT()
+  cleanupRefine()
 }
