@@ -1,6 +1,5 @@
 import { useEffect } from 'react'
 import { RecordingOverlay } from './components/RecordingOverlay'
-import { StatusIndicator } from './components/StatusIndicator'
 import { useRecordingStore } from './store/recordingStore'
 
 function App(): React.JSX.Element {
@@ -9,6 +8,8 @@ function App(): React.JSX.Element {
   const stopRecording = useRecordingStore((s) => s.stopRecording)
   const setAudioLevel = useRecordingStore((s) => s.setAudioLevel)
   const setError = useRecordingStore((s) => s.setError)
+  const setInterimText = useRecordingStore((s) => s.setInterimText)
+  const setFinalText = useRecordingStore((s) => s.setFinalText)
   const isIdle = status === 'idle'
   const isRecording = status === 'recording'
   const hasIPC = typeof window.api?.toggleRecording === 'function'
@@ -37,7 +38,6 @@ function App(): React.JSX.Element {
 
     cleanups.push(
       window.api.onRecordingStateChanged((payload) => {
-        console.log('[renderer] recording:state-changed', payload)
         if (payload.status === 'recording') {
           startRecording()
         } else {
@@ -62,14 +62,29 @@ function App(): React.JSX.Element {
       )
     }
 
+    if (window.api.onTranscriptionInterim) {
+      cleanups.push(
+        window.api.onTranscriptionInterim((text) => {
+          setInterimText(text)
+        })
+      )
+    }
+
+    if (window.api.onTranscriptionFinal) {
+      cleanups.push(
+        window.api.onTranscriptionFinal((text) => {
+          setFinalText(text)
+          console.log('[renderer] final transcription:', text)
+        })
+      )
+    }
+
     return () => {
       cleanups.forEach((c) => c())
     }
-  }, [hasIPC, startRecording, stopRecording, setAudioLevel, setError])
+  }, [hasIPC, startRecording, stopRecording, setAudioLevel, setError, setInterimText, setFinalText])
 
   const handleToggle = (): void => {
-    console.log('[renderer] handleToggle, hasIPC:', hasIPC, 'status:', status)
-
     if (hasIPC) {
       try {
         if (isRecording) {
@@ -120,8 +135,6 @@ function App(): React.JSX.Element {
           <span className={`h-3 w-3 rounded-full ${isIdle ? 'bg-white' : 'bg-white/80'}`} />
           {isIdle ? 'Start Recording' : 'Stop Recording'}
         </button>
-
-        <StatusIndicator />
       </div>
     </div>
   )

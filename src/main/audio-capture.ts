@@ -14,6 +14,7 @@ export interface AudioErrorPayload {
 
 export type AudioCaptureListener = {
   onLevel?: (level: number) => void
+  onChunk?: (chunk: Buffer) => void
   onError?: (error: AudioErrorPayload) => void
   onStop?: () => void
 }
@@ -126,6 +127,7 @@ export function startCapture(): boolean {
     session.chunks.push(buf)
     session.chunkCount++
     session.totalBytes += buf.length
+    listener?.onChunk?.(buf)
   })
 
   ai.on('error', (err: Error) => {

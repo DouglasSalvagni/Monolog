@@ -11,6 +11,8 @@ interface RecordingApi {
   onRecordingStateChanged: (callback: (payload: { status: string }) => void) => () => void
   onAudioLevel: (callback: (level: number) => void) => () => void
   onAudioError: (callback: (error: AudioErrorPayload) => void) => () => void
+  onTranscriptionInterim: (callback: (text: string) => void) => () => void
+  onTranscriptionFinal: (callback: (text: string) => void) => () => void
   showWindow: () => void
   quitApp: () => void
   writeClipboard: (text: string) => void

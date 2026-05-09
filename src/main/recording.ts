@@ -1,4 +1,4 @@
-import { BrowserWindow } from 'electron'
+import { BrowserWindow, clipboard } from 'electron'
 import { setTrayRecording, setTrayIdle } from './tray'
 import {
   startCapture,
@@ -8,8 +8,17 @@ import {
   cleanupCapture,
   type AudioErrorPayload
 } from './audio-capture'
+import {
+  startTranscription,
+  sendAudioChunk,
+  stopTranscription,
+  setSttListener,
+  cleanupSTT,
+  initSTT
+} from './stt'
 
 let mainWindow: BrowserWindow | null = null
+let finalTranscript = ''
 
 export function setMainWindow(win: BrowserWindow | null): void {
   mainWindow = win
@@ -25,8 +34,44 @@ function onLevel(level: number): void {
   send('audio:level', { level })
 }
 
-function onError(error: AudioErrorPayload): void {
+function onChunk(chunk: Buffer): void {
+  sendAudioChunk(chunk)
+}
+
+function onInterim(text: string): void {
+  send('transcription:interim', { text })
+}
+
+function onFinal(text: string): void {
+  finalTranscript = text
+  send('transcription:final', { text })
+}
+
+function onAudioError(error: AudioErrorPayload): void {
   send('audio:error', error)
+  stopTranscription()
+}
+
+function onSttError(error: Error): void {
+  console.error('[recording] STT error:', error.message)
+  send('audio:error', { message: error.message, code: 'STREAM_ERROR' })
+}
+
+export function initRecording(apiKey: string): void {
+  initSTT(apiKey)
+
+  setSttListener({
+    onInterim,
+    onFinal,
+    onError: onSttError
+  })
+
+  setListener({
+    onLevel,
+    onChunk,
+    onError: onAudioError,
+    onStop: onStop
+  })
 }
 
 function onStop(): void {
@@ -35,27 +80,35 @@ function onStop(): void {
   setTrayIdle()
 }
 
-export function initRecording(): void {
-  setListener({
-    onLevel,
-    onError,
-    onStop
-  })
-}
-
 export function toggleRecording(): void {
   if (isRecording()) {
     const buf = stopCapture()
+    const final = finalTranscript
+    finalTranscript = ''
+
     if (buf) {
-      console.log(`[recording] captured ${buf.length} bytes (${(buf.length / 32000).toFixed(1)}s)`)
+      const dur = (buf.length / 32000).toFixed(1)
+      console.log(`[recording] captured ${buf.length} bytes (${dur}s)`)
     }
+
+    if (final) {
+      console.log(`[recording] final transcript: "${final}"`)
+      clipboard.writeText(final)
+      console.log('[recording] copied to clipboard')
+    }
+
+    stopTranscription()
     send('recording:stopped')
     send('recording:state-changed', { status: 'idle' })
     setTrayIdle()
   } else {
+    finalTranscript = ''
+    stopTranscription()
+
     const started = startCapture()
     if (started) {
       console.log('[recording] audio capture started')
+      startTranscription()
       send('recording:started')
       send('recording:state-changed', { status: 'recording' })
       setTrayRecording()
@@ -65,5 +118,7 @@ export function toggleRecording(): void {
 
 export function resetRecording(): void {
   stopCapture()
+  stopTranscription()
   cleanupCapture()
+  cleanupSTT()
 }

@@ -21,11 +21,13 @@
     "build:linux": "electron-vite build && electron-builder --linux"
   },
   "dependencies": {
+    "@deepgram/sdk": "^5.1.0",
     "@electron-toolkit/preload": "^3.0.2",
     "@electron-toolkit/utils": "^4.0.0",
+    "dotenv": "^17.4.2",
+    "naudiodon": "file:./vendor/naudiodon-patched-2.3.6.tgz",
     "uiohook-napi": "^1.5.5",
-    "zustand": "^5.0.13",
-    "naudiodon": "file:./vendor/naudiodon-patched-2.3.6.tgz"
+    "zustand": "^5.0.13"
   },
   "devDependencies": {
     "@electron-toolkit/eslint-config-prettier": "^3.0.0",

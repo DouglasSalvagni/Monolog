@@ -35,6 +35,20 @@ const api = {
     return () => ipcRenderer.removeListener('audio:error', handler)
   },
 
+  onTranscriptionInterim: (callback: (text: string) => void): (() => void) => {
+    const handler = (_event: Electron.IpcRendererEvent, payload: { text: string }): void =>
+      callback(payload.text)
+    ipcRenderer.on('transcription:interim', handler)
+    return () => ipcRenderer.removeListener('transcription:interim', handler)
+  },
+
+  onTranscriptionFinal: (callback: (text: string) => void): (() => void) => {
+    const handler = (_event: Electron.IpcRendererEvent, payload: { text: string }): void =>
+      callback(payload.text)
+    ipcRenderer.on('transcription:final', handler)
+    return () => ipcRenderer.removeListener('transcription:final', handler)
+  },
+
   showWindow: (): void => ipcRenderer.send('app:show-window'),
 
   quitApp: (): void => ipcRenderer.send('app:quit'),

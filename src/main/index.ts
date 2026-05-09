@@ -1,3 +1,6 @@
+import { config as dotenvConfig } from 'dotenv'
+dotenvConfig()
+
 import { app, shell, BrowserWindow, ipcMain, clipboard } from 'electron'
 import { join } from 'path'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
@@ -88,7 +91,12 @@ app.whenReady().then(() => {
   })
 
   registerIpcHandlers()
-  initRecording()
+
+  const apiKey = process.env['DEEPGRAM_API_KEY']
+  if (!apiKey) {
+    console.warn('[main] DEEPGRAM_API_KEY not set — transcription disabled')
+  }
+  initRecording(apiKey || '')
   createWindow()
   createTray()
   setTrayIdle()
