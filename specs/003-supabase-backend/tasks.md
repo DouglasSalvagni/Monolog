@@ -16,12 +16,12 @@
 
 **Purpose**: Initialize Supabase project and dependencies
 
-- [ ] T001 Install Supabase CLI globally: `npm install -g supabase`
-- [ ] T002 Login to Supabase: `supabase login`
-- [ ] T003 Create new Supabase project (via dashboard or `supabase projects create`)
-- [ ] T004 Initialize Supabase local config: `supabase init` in `supabase/` directory
+- [X] T001 Install Supabase CLI globally via brew (`brew install supabase/tap/supabase`)
+- [ ] T002 Login to Supabase: `supabase login` (interactive — opens browser)
+- [ ] T003 Create new Supabase project (via dashboard at https://supabase.com)
+- [X] T004 Initialize Supabase local config: `supabase init` in `supabase/` directory
 - [ ] T005 Link to remote project: `supabase link --project-ref <ref>` in `supabase/`
-- [ ] T006 Install `@supabase/supabase-js` in desktop app: `npm install @supabase/supabase-js`
+- [X] T006 Install `@supabase/supabase-js` in desktop app: `npm install @supabase/supabase-js`
 
 ---
 
@@ -31,11 +31,11 @@
 
 **⚠️ CRITICAL**: No user story work can begin until this phase is complete
 
-- [ ] T007 Create migration file at `supabase/migrations/001_create_transcriptions.sql` with table definition, indexes, and RLS policy per data-model.md
+- [X] T007 Create migration file at `supabase/migrations/001_create_transcriptions.sql` with table definition, indexes, and RLS policy per data-model.md
 - [ ] T008 Apply migration locally: `supabase migration up`
-- [ ] T009 Create `src/main/supabase.ts` — Supabase client wrapper with `createClient()` using env vars
-- [ ] T010 Add `SUPABASE_URL` and `SUPABASE_ANON_KEY` to `.env.example`
-- [ ] T011 Add Supabase env var loading in `src/main/index.ts` (dotenv)
+- [X] T009 Create `apps/desktop/src/main/supabase.ts` — Supabase client wrapper with `createClient()` using env vars
+- [X] T010 Add `SUPABASE_URL` and `SUPABASE_ANON_KEY` to `.env.example`
+- [X] T011 Add Supabase env var loading in `apps/desktop/src/main/index.ts` (dotenv)
 
 **Checkpoint**: Foundation ready — user story implementation can now begin
 
@@ -49,12 +49,12 @@
 
 ### Implementation
 
-- [ ] T012 [P] [US1] Create `src/renderer/src/store/authStore.ts` — Zustand store with `user`, `loading`, `error` state
-- [ ] T013 [P] [US1] Create `src/renderer/src/components/LoginScreen.tsx` — email/password form with signup/login toggle and error display
-- [ ] T014 [US1] Add auth IPC handlers in `src/main/index.ts` for `auth:login`, `auth:signup`, `auth:logout`, `auth:restore-session`
-- [ ] T015 [P] [US1] Add auth IPC listeners in `src/preload/index.ts` + update `src/preload/index.d.ts`
-- [ ] T016 [US1] Implement Supabase Auth methods in `src/main/supabase.ts` — `login()`, `signup()`, `logout()`, `restoreSession()`, `onAuthStateChange()`
-- [ ] T017 [US1] Integrate auth store + LoginScreen into `src/renderer/src/App.tsx` — show LoginScreen when not authenticated
+- [ ] T012 [P] [US1] Create `apps/desktop/src/renderer/src/store/authStore.ts` — Zustand store with `user`, `loading`, `error` state
+- [ ] T013 [P] [US1] Create `apps/desktop/src/renderer/src/components/LoginScreen.tsx` — email/password form with signup/login toggle and error display
+- [ ] T014 [US1] Add auth IPC handlers in `apps/desktop/src/main/index.ts` for `auth:login`, `auth:signup`, `auth:logout`, `auth:restore-session`
+- [ ] T015 [P] [US1] Add auth IPC listeners in `apps/desktop/src/preload/index.ts` + update `apps/desktop/src/preload/index.d.ts`
+- [X] T016 [US1] Implement Supabase Auth methods in `apps/desktop/src/main/supabase.ts` — `login()`, `signup()`, `logout()`, `restoreSession()`, `onAuthStateChange()`
+- [ ] T017 [US1] Integrate auth store + LoginScreen into `apps/desktop/src/renderer/src/App.tsx` — show LoginScreen when not authenticated
 
 **Checkpoint**: US1 complete — user can create account, log in, session persists, logout works.
 
@@ -72,9 +72,9 @@
 - [ ] T019 [P] [US2] Create shared CORS utility at `supabase/functions/_shared/cors.ts`
 - [ ] T020 [US2] Add Edge Function env vars via Supabase dashboard: `OPENAI_API_KEY`, `OPENAI_BASE_URL`, `OPENAI_MODEL`
 - [ ] T021 [US2] Deploy Edge Function: `supabase functions deploy refine`
-- [ ] T022 [US2] Add `callRefineEdgeFunction()` to `src/main/supabase.ts` — POST to `/functions/v1/refine` with auth token
-- [ ] T023 [US2] Refactor `src/main/recording.ts` onFinal() — try Edge Function first, fallback to local LLM on failure
-- [ ] T024 [US2] Update `src/main/refine.ts` — keep local LLM as offline fallback only
+- [X] T022 [US2] Add `callRefineEdgeFunction()` to `apps/desktop/src/main/supabase.ts` — POST to `/functions/v1/refine` with auth token (implemented)
+- [ ] T023 [US2] Refactor `apps/desktop/src/main/recording.ts` onFinal() — try Edge Function first, fallback to local LLM on failure
+- [ ] T024 [US2] Update `apps/desktop/src/main/refine.ts` — keep local LLM as offline fallback only
 - [ ] T025 [US2] Add `transcription:saving` IPC state so UI shows saving indicator
 
 **Checkpoint**: US2 complete — core pipeline uses Edge Function, falls back to local LLM when offline.
@@ -92,12 +92,12 @@
 - [ ] T026 [US3] Create Edge Function at `supabase/functions/list/index.ts` — GET handler that queries transcriptions by user_id with pagination
 - [ ] T027 [US3] Create Edge Function at `supabase/functions/delete/index.ts` — DELETE handler that removes a transcription (RLS ensures ownership)
 - [ ] T028 [US3] Deploy list + delete functions: `supabase functions deploy list && supabase functions deploy delete`
-- [ ] T029 [P] [US3] Add `fetchHistory()` and `deleteTranscription()` to `src/main/supabase.ts`
-- [ ] T030 [P] [US3] Add history IPC handlers in `src/main/index.ts` for `history:list`, `history:delete`
-- [ ] T031 [P] [US3] Add history IPC listeners in `src/preload/index.ts` + update `src/preload/index.d.ts`
-- [ ] T032 [US3] Create `src/renderer/src/components/HistoryList.tsx` — list of past transcriptions with timestamps, copy/delete buttons
-- [ ] T033 [US3] Add `history` state to `src/renderer/src/store/authStore.ts` (or create separate historyStore)
-- [ ] T034 [US3] Integrate HistoryList into `src/renderer/src/App.tsx` — show after recording stop or via button
+- [X] T029 [P] [US3] Add `fetchHistory()` and `deleteTranscription()` to `apps/desktop/src/main/supabase.ts` (implemented)`
+- [ ] T030 [P] [US3] Add history IPC handlers in `apps/desktop/src/main/index.ts` for `history:list`, `history:delete`
+- [ ] T031 [P] [US3] Add history IPC listeners in `apps/desktop/src/preload/index.ts` + update `apps/desktop/src/preload/index.d.ts`
+- [ ] T032 [US3] Create `apps/desktop/src/renderer/src/components/HistoryList.tsx` — list of past transcriptions with timestamps, copy/delete buttons
+- [ ] T033 [US3] Add `history` state to `apps/desktop/src/renderer/src/store/authStore.ts` (or create separate historyStore)
+- [ ] T034 [US3] Integrate HistoryList into `apps/desktop/src/renderer/src/App.tsx` — show after recording stop or via button
 
 **Checkpoint**: US3 complete — user can browse, copy, and delete past transcriptions.
 
@@ -112,7 +112,7 @@
 ### Implementation
 
 - [ ] T035 [US4] Enable Realtime replication on `transcriptions` table in Supabase dashboard → Replication → add table
-- [ ] T036 [US4] Add Realtime subscription in `src/main/supabase.ts` — subscribe to `transcriptions` INSERT events filtered by user_id
+- [ ] T036 [US4] Add Realtime subscription in `apps/desktop/src/main/supabase.ts` — subscribe to `transcriptions` INSERT events filtered by user_id
 - [ ] T037 [US4] Add `history:realtime-new` IPC channel from main to renderer for new realtime entries
 - [ ] T038 [US4] Integrate Realtime updates into HistoryList — new entries appear without manual refresh
 
@@ -124,9 +124,9 @@
 
 **Purpose**: Handle offline gracefully, clean up, verify everything
 
-- [ ] T039 [P] Implement offline queue in `src/main/supabase.ts` — save unsynced transcriptions to local JSON file, sync when online
+- [ ] T039 [P] Implement offline queue in `apps/desktop/src/main/supabase.ts` — save unsynced transcriptions to local JSON file, sync when online
 - [ ] T040 [P] Add connectivity detection (navigator.onLine / window 'online'/'offline' events) in renderer
-- [ ] T041 Update `src/renderer/src/App.tsx` — show connectivity status indicator (Online/Offline)
+- [ ] T041 Update `apps/desktop/src/renderer/src/App.tsx` — show connectivity status indicator (Online/Offline)
 - [ ] T042 Create `supabase/seed.sql` with sample data for development testing
 - [ ] T043 [P] Run `npm run typecheck` and fix TypeScript errors
 - [ ] T044 [P] Run `npm run lint` and fix lint errors

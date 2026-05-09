@@ -8,6 +8,7 @@ import icon from '../../resources/icon.png?asset'
 import { createTray, setTrayIdle, destroyTray } from './tray'
 import { registerShortcuts, unregisterShortcuts } from './shortcuts'
 import { setMainWindow, resetRecording, toggleRecording, initRecording } from './recording'
+import { initSupabase } from './supabase'
 
 let mainWindow: BrowserWindow | null = null
 let isQuitting = false
@@ -106,6 +107,16 @@ app.whenReady().then(() => {
     baseUrl: llmBase || undefined,
     model: llmModel || undefined
   })
+
+  const supabaseUrl = process.env['SUPABASE_URL']
+  const supabaseAnonKey = process.env['SUPABASE_ANON_KEY']
+  if (supabaseUrl && supabaseAnonKey) {
+    initSupabase(supabaseUrl, supabaseAnonKey)
+    console.log('[main] Supabase initialized')
+  } else {
+    console.warn('[main] SUPABASE_URL or SUPABASE_ANON_KEY not set — backend features disabled')
+  }
+
   createWindow()
   createTray()
   setTrayIdle()

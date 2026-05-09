@@ -24,6 +24,7 @@
     "@deepgram/sdk": "^5.1.0",
     "@electron-toolkit/preload": "^3.0.2",
     "@electron-toolkit/utils": "^4.0.0",
+    "@supabase/supabase-js": "^2.105.4",
     "dotenv": "^17.4.2",
     "naudiodon": "file:./vendor/naudiodon-patched-2.3.6.tgz",
     "openai": "^6.37.0",
