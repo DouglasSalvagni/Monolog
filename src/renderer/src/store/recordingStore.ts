@@ -23,17 +23,13 @@ export const useRecordingStore = create<RecordingState>((set) => ({
   audioLevel: 0,
   error: null,
 
-  startRecording: () =>
-    set({ status: 'recording', error: null }),
+  startRecording: () => set({ status: 'recording', error: null }),
 
-  stopRecording: () =>
-    set({ status: 'idle', audioLevel: 0 }),
+  stopRecording: () => set({ status: 'idle', audioLevel: 0 }),
 
-  setAudioLevel: (level: number) =>
-    set({ audioLevel: level }),
+  setAudioLevel: (level: number) => set({ audioLevel: level }),
 
-  setError: (error: AudioErrorState | null) =>
-    set({ error, status: error ? 'idle' : 'idle' }),
+  setError: (error: AudioErrorState | null) => set({ error, status: error ? 'idle' : 'idle' }),
 
   resetToIdle: () =>
     set({

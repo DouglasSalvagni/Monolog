@@ -12,29 +12,21 @@ const api = {
     return () => ipcRenderer.removeListener('recording:stopped', callback)
   },
 
-  onRecordingStateChanged: (
-    callback: (payload: { status: string }) => void
-  ): (() => void) => {
-    const handler = (
-      _event: Electron.IpcRendererEvent,
-      payload: { status: string }
-    ): void => callback(payload)
+  onRecordingStateChanged: (callback: (payload: { status: string }) => void): (() => void) => {
+    const handler = (_event: Electron.IpcRendererEvent, payload: { status: string }): void =>
+      callback(payload)
     ipcRenderer.on('recording:state-changed', handler)
     return () => ipcRenderer.removeListener('recording:state-changed', handler)
   },
 
   onAudioLevel: (callback: (level: number) => void): (() => void) => {
-    const handler = (
-      _event: Electron.IpcRendererEvent,
-      payload: { level: number }
-    ): void => callback(payload.level)
+    const handler = (_event: Electron.IpcRendererEvent, payload: { level: number }): void =>
+      callback(payload.level)
     ipcRenderer.on('audio:level', handler)
     return () => ipcRenderer.removeListener('audio:level', handler)
   },
 
-  onAudioError: (
-    callback: (error: { message: string; code: string }) => void
-  ): (() => void) => {
+  onAudioError: (callback: (error: { message: string; code: string }) => void): (() => void) => {
     const handler = (
       _event: Electron.IpcRendererEvent,
       error: { message: string; code: string }
@@ -47,8 +39,7 @@ const api = {
 
   quitApp: (): void => ipcRenderer.send('app:quit'),
 
-  writeClipboard: (text: string): void =>
-    ipcRenderer.send('clipboard:write', { text }),
+  writeClipboard: (text: string): void => ipcRenderer.send('clipboard:write', { text }),
 
   toggleRecording: (): void => ipcRenderer.send('recording:toggle'),
 
@@ -65,8 +56,8 @@ if (process.contextIsolated) {
     console.error(error)
   }
 } else {
-    // @ts-expect-error defined in index.d.ts
-    window.electron = electronAPI
-    // @ts-expect-error defined in index.d.ts
-    window.api = api
+  // @ts-expect-error defined in index.d.ts
+  window.electron = electronAPI
+  // @ts-expect-error defined in index.d.ts
+  window.api = api
 }

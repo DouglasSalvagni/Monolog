@@ -8,9 +8,7 @@ interface AudioErrorPayload {
 interface RecordingApi {
   onRecordingStarted: (callback: () => void) => () => void
   onRecordingStopped: (callback: () => void) => () => void
-  onRecordingStateChanged: (
-    callback: (payload: { status: string }) => void
-  ) => () => void
+  onRecordingStateChanged: (callback: (payload: { status: string }) => void) => () => void
   onAudioLevel: (callback: (level: number) => void) => () => void
   onAudioError: (callback: (error: AudioErrorPayload) => void) => () => void
   showWindow: () => void

@@ -117,9 +117,7 @@ function App(): React.JSX.Element {
               : 'bg-gray-500 hover:bg-gray-600 hover:shadow-xl'
           }`}
         >
-          <span
-            className={`h-3 w-3 rounded-full ${isIdle ? 'bg-white' : 'bg-white/80'}`}
-          />
+          <span className={`h-3 w-3 rounded-full ${isIdle ? 'bg-white' : 'bg-white/80'}`} />
           {isIdle ? 'Start Recording' : 'Stop Recording'}
         </button>
 

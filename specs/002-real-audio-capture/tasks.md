@@ -96,11 +96,11 @@
 
 **Purpose**: Cleanup, verification, and edge case hardening
 
-- [ ] T024 [P] Run `npm run typecheck` and fix any TypeScript errors
-- [ ] T025 [P] Run `npm run lint` and fix any lint errors
-- [ ] T026 Verify audio buffer is cleaned up on app quit (app.on('before-quit') in src/main/index.ts)
-- [ ] T027 Remove any remaining mock/placeholder code from renderer components
-- [ ] T028 Run through all quickstart.md manual test scenarios and verify they pass
+- [X] T024 [P] Run `npm run typecheck` and fix any TypeScript errors
+- [X] T025 [P] Run `npm run lint` and fix any lint errors
+- [X] T026 Verify audio buffer is cleaned up on app quit (app.on('before-quit') in src/main/index.ts)
+- [X] T027 Remove any remaining mock/placeholder code from renderer components
+- [X] T028 Run through all quickstart.md manual test scenarios and verify they pass
 
 ---
 
