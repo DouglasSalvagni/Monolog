@@ -61,12 +61,12 @@
 
 ### Implementation
 
-- [ ] T011 [P] [US2] Add RMS level calculation to audio-capture.ts and emit audio:level IPC events every ~100ms during recording
-- [ ] T012 [P] [US2] Add audio:level IPC listener in src/preload/index.ts and update src/preload/index.d.ts types
-- [ ] T013 [P] [US2] Add audioLevel field to Zustand store in src/renderer/src/store/recordingStore.ts
-- [ ] T014 [US2] Create AudioMeter component in src/renderer/src/components/AudioMeter.tsx — visual bar that reacts to 0-1 level values
-- [ ] T015 [US2] Integrate AudioMeter into src/renderer/src/components/RecordingOverlay.tsx
-- [ ] T016 [US2] Wire audio:level IPC → store → AudioMeter in src/renderer/src/App.tsx
+- [X] T011 [P] [US2] Add RMS level calculation to audio-capture.ts and emit audio:level IPC events every ~100ms during recording
+- [X] T012 [P] [US2] Add audio:level IPC listener in src/preload/index.ts and update src/preload/index.d.ts types
+- [X] T013 [P] [US2] Add audioLevel field to Zustand store in src/renderer/src/store/recordingStore.ts
+- [X] T014 [US2] Create AudioMeter component in src/renderer/src/components/AudioMeter.tsx — visual bar that reacts to 0-1 level values
+- [X] T015 [US2] Integrate AudioMeter into src/renderer/src/components/RecordingOverlay.tsx
+- [X] T016 [US2] Wire audio:level IPC → store → AudioMeter in src/renderer/src/App.tsx
 
 **Checkpoint**: US2 complete — VU meter shows real-time audio level during recording.
 
