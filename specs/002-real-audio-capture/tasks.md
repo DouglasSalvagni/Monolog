@@ -40,14 +40,14 @@
 
 ### Implementation
 
-- [ ] T003 [US1] Refactor src/main/recording.ts to delegate start/stop to audio-capture.ts instead of just toggling a boolean
-- [ ] T004 [US1] Wire audio-capture events to existing IPC channels in src/main/recording.ts (reuse recording:started / recording:stopped / recording:state-changed)
-- [ ] T005 [P] [US1] Add safety timer (10min auto-stop) to audio-capture.ts that stops capture and emits timeout event
-- [ ] T006 [P] [US1] Add 500ms debounce logic to src/main/recording.ts toggleRecording() to prevent rapid toggle flickering
-- [ ] T007 [US1] Add audio control methods to preload API in src/preload/index.ts and src/preload/index.d.ts
-- [ ] T008 [US1] Integrate audio capture state with Zustand store in src/renderer/src/store/recordingStore.ts (remove 'processing' status, wire to actual IPC events)
-- [ ] T009 [US1] Update src/renderer/src/App.tsx — remove mock clipboard logic, wire to real IPC state changes
-- [ ] T010 [US1] Add start/stop IPC handlers in src/main/index.ts for audio:start-capture and audio:stop-capture channels
+- [X] T003 [US1] Refactor src/main/recording.ts to delegate start/stop to audio-capture.ts instead of just toggling a boolean
+- [X] T004 [US1] Wire audio-capture events to existing IPC channels in src/main/recording.ts (reuse recording:started / recording:stopped / recording:state-changed)
+- [X] T005 [P] [US1] Add safety timer (10min auto-stop) to audio-capture.ts that stops capture and emits timeout event
+- [X] T006 [P] [US1] Add 500ms debounce logic to src/main/recording.ts toggleRecording() to prevent rapid toggle flickering
+- [X] T007 [US1] Add audio control methods to preload API in src/preload/index.ts and src/preload/index.d.ts
+- [X] T008 [US1] Integrate audio capture state with Zustand store in src/renderer/src/store/recordingStore.ts (remove 'processing' status, wire to actual IPC events)
+- [X] T009 [US1] Update src/renderer/src/App.tsx — remove mock clipboard logic, wire to real IPC state changes
+- [X] T010 [US1] Add start/stop IPC handlers in src/main/index.ts for audio:start-capture and audio:stop-capture channels
 
 **Checkpoint**: US1 complete — audio recording works end-to-end. Audio is captured, buffered, and available after stop.
 

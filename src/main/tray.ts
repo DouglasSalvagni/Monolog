@@ -1,5 +1,6 @@
 import { app, Tray, Menu, nativeImage, BrowserWindow } from 'electron'
-import { toggleRecording, getIsRecording } from './recording'
+import { toggleRecording } from './recording'
+import { isRecording } from './audio-capture'
 import iconIdle from '../renderer/src/assets/icon-idle.png?asset'
 import iconRecording from '../renderer/src/assets/icon-recording.png?asset'
 
@@ -16,11 +17,11 @@ const icons = {
 }
 
 function createContextMenu(): Menu {
-  const isRecording = getIsRecording()
+  const recording = isRecording()
 
   return Menu.buildFromTemplate([
     {
-      label: isRecording ? '⏹ Stop Recording' : '⏺ Toggle Recording',
+      label: recording ? '⏹ Stop Recording' : '⏺ Toggle Recording',
       click: (): void => {
         toggleRecording()
       }

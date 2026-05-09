@@ -10,7 +10,7 @@ import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import icon from '../../resources/icon.png?asset'
 import { createTray, setTrayIdle, destroyTray } from './tray'
 import { registerShortcuts, unregisterShortcuts } from './shortcuts'
-import { setMainWindow, resetRecording, toggleRecording } from './recording'
+import { setMainWindow, resetRecording, toggleRecording, initRecording } from './recording'
 
 let mainWindow: BrowserWindow | null = null
 let isQuitting = false
@@ -74,6 +74,16 @@ function registerIpcHandlers(): void {
     console.log('[main] received recording:toggle from renderer')
     toggleRecording()
   })
+
+  ipcMain.on('audio:start-capture', () => {
+    console.log('[main] received audio:start-capture')
+    toggleRecording()
+  })
+
+  ipcMain.on('audio:stop-capture', () => {
+    console.log('[main] received audio:stop-capture')
+    toggleRecording()
+  })
 }
 
 app.whenReady().then(() => {
@@ -84,6 +94,7 @@ app.whenReady().then(() => {
   })
 
   registerIpcHandlers()
+  initRecording()
   createWindow()
   createTray()
   setTrayIdle()

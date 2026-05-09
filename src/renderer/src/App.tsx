@@ -7,9 +7,10 @@ function App(): React.JSX.Element {
   const status = useRecordingStore((s) => s.status)
   const startRecording = useRecordingStore((s) => s.startRecording)
   const stopRecording = useRecordingStore((s) => s.stopRecording)
-  const finishProcessing = useRecordingStore((s) => s.finishProcessing)
+  const setAudioLevel = useRecordingStore((s) => s.setAudioLevel)
+  const setError = useRecordingStore((s) => s.setError)
   const isIdle = status === 'idle'
-  const isProcessing = status === 'processing'
+  const isRecording = status === 'recording'
   const hasIPC = typeof window.api?.toggleRecording === 'function'
 
   useEffect(() => {
@@ -18,55 +19,72 @@ function App(): React.JSX.Element {
       return
     }
 
-    const cleanupStarted = window.api.onRecordingStarted(() => {
-      console.log('[renderer] received recording:started')
-      startRecording()
-    })
+    const cleanups: (() => void)[] = []
 
-    const cleanupStopped = window.api.onRecordingStopped(() => {
-      console.log('[renderer] received recording:stopped')
-      stopRecording()
-      setTimeout(() => {
-        const mockText = 'Mock transcription text — Monolog'
-        navigator.clipboard
-          .writeText(mockText)
-          .then(() => console.log('[renderer] copied to clipboard'))
-          .catch((e) => console.error('[renderer] clipboard write failed:', e))
-        finishProcessing()
-        console.log('[renderer] processing complete')
-      }, 2000)
-    })
+    cleanups.push(
+      window.api.onRecordingStarted(() => {
+        console.log('[renderer] received recording:started')
+        startRecording()
+      })
+    )
+
+    cleanups.push(
+      window.api.onRecordingStopped(() => {
+        console.log('[renderer] received recording:stopped')
+        stopRecording()
+      })
+    )
+
+    cleanups.push(
+      window.api.onRecordingStateChanged((payload) => {
+        console.log('[renderer] recording:state-changed', payload)
+        if (payload.status === 'recording') {
+          startRecording()
+        } else {
+          stopRecording()
+        }
+      })
+    )
+
+    cleanups.push(
+      window.api.onAudioLevel((level) => {
+        setAudioLevel(level)
+      })
+    )
+
+    if (window.api.onAudioError) {
+      cleanups.push(
+        window.api.onAudioError((error) => {
+          console.error('[renderer] audio error:', error)
+          setError(error)
+          stopRecording()
+        })
+      )
+    }
 
     return () => {
-      cleanupStarted()
-      cleanupStopped()
+      cleanups.forEach((c) => c())
     }
-  }, [startRecording, stopRecording, finishProcessing, hasIPC])
+  }, [hasIPC, startRecording, stopRecording, setAudioLevel, setError])
 
   const handleToggle = (): void => {
-    if (isProcessing) return
-    console.log('[renderer] handleToggle clicked, hasIPC:', hasIPC, 'status:', status)
+    console.log('[renderer] handleToggle, hasIPC:', hasIPC, 'status:', status)
 
     if (hasIPC) {
-      console.log('[renderer] sending IPC recording:toggle')
       try {
-        window.api.toggleRecording()
+        if (isRecording) {
+          window.api.stopCapture()
+        } else {
+          window.api.startCapture()
+        }
       } catch (err) {
         console.error('[renderer] IPC failed:', err)
       }
     } else {
-      console.log('[renderer] direct toggle (no IPC)')
       if (isIdle) {
         startRecording()
       } else {
         stopRecording()
-        setTimeout(() => {
-          const mockText = 'Mock transcription text — Monolog'
-          navigator.clipboard
-            .writeText(mockText)
-            .catch((e) => console.error('[renderer] clipboard write failed:', e))
-          finishProcessing()
-        }, 2000)
       }
     }
   }
@@ -93,11 +111,10 @@ function App(): React.JSX.Element {
 
         <button
           onClick={handleToggle}
-          disabled={isProcessing}
-          className={`flex items-center gap-2 rounded-full px-8 py-3 text-sm font-semibold text-white shadow-lg transition-all duration-200 disabled:cursor-not-allowed disabled:opacity-50 ${
+          className={`flex items-center gap-2 rounded-full px-8 py-3 text-sm font-semibold text-white shadow-lg transition-all duration-200 active:scale-95 ${
             isIdle
-              ? 'bg-red-500 hover:bg-red-600 hover:shadow-xl active:scale-95'
-              : 'bg-gray-500 hover:bg-gray-600 hover:shadow-xl active:scale-95'
+              ? 'bg-red-500 hover:bg-red-600 hover:shadow-xl'
+              : 'bg-gray-500 hover:bg-gray-600 hover:shadow-xl'
           }`}
         >
           <span

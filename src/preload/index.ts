@@ -15,10 +15,32 @@ const api = {
   onRecordingStateChanged: (
     callback: (payload: { status: string }) => void
   ): (() => void) => {
-    const handler = (_event: Electron.IpcRendererEvent, payload: { status: string }): void =>
-      callback(payload)
+    const handler = (
+      _event: Electron.IpcRendererEvent,
+      payload: { status: string }
+    ): void => callback(payload)
     ipcRenderer.on('recording:state-changed', handler)
     return () => ipcRenderer.removeListener('recording:state-changed', handler)
+  },
+
+  onAudioLevel: (callback: (level: number) => void): (() => void) => {
+    const handler = (
+      _event: Electron.IpcRendererEvent,
+      payload: { level: number }
+    ): void => callback(payload.level)
+    ipcRenderer.on('audio:level', handler)
+    return () => ipcRenderer.removeListener('audio:level', handler)
+  },
+
+  onAudioError: (
+    callback: (error: { message: string; code: string }) => void
+  ): (() => void) => {
+    const handler = (
+      _event: Electron.IpcRendererEvent,
+      error: { message: string; code: string }
+    ): void => callback(error)
+    ipcRenderer.on('audio:error', handler)
+    return () => ipcRenderer.removeListener('audio:error', handler)
   },
 
   showWindow: (): void => ipcRenderer.send('app:show-window'),
@@ -28,7 +50,11 @@ const api = {
   writeClipboard: (text: string): void =>
     ipcRenderer.send('clipboard:write', { text }),
 
-  toggleRecording: (): void => ipcRenderer.send('recording:toggle')
+  toggleRecording: (): void => ipcRenderer.send('recording:toggle'),
+
+  startCapture: (): void => ipcRenderer.send('audio:start-capture'),
+
+  stopCapture: (): void => ipcRenderer.send('audio:stop-capture')
 }
 
 if (process.contextIsolated) {

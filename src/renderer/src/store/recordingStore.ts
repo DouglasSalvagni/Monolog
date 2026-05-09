@@ -1,42 +1,44 @@
 import { create } from 'zustand'
 
-export type RecordingStatus = 'idle' | 'recording' | 'processing'
+export type RecordingStatus = 'idle' | 'recording'
+
+interface AudioErrorState {
+  message: string
+  code: string
+}
 
 interface RecordingState {
   status: RecordingStatus
-  transcriptText: string
-  lastTransitionAt: string | null
+  audioLevel: number
+  error: AudioErrorState | null
   startRecording: () => void
   stopRecording: () => void
-  setTranscript: (text: string) => void
-  finishProcessing: () => void
+  setAudioLevel: (level: number) => void
+  setError: (error: AudioErrorState | null) => void
   resetToIdle: () => void
 }
 
 export const useRecordingStore = create<RecordingState>((set) => ({
   status: 'idle',
-  transcriptText: '',
-  lastTransitionAt: null,
+  audioLevel: 0,
+  error: null,
 
   startRecording: () =>
-    set({ status: 'recording', lastTransitionAt: new Date().toISOString() }),
+    set({ status: 'recording', error: null }),
 
   stopRecording: () =>
-    set({ status: 'processing', lastTransitionAt: new Date().toISOString() }),
+    set({ status: 'idle', audioLevel: 0 }),
 
-  setTranscript: (text: string) =>
-    set({ transcriptText: text }),
+  setAudioLevel: (level: number) =>
+    set({ audioLevel: level }),
 
-  finishProcessing: () =>
-    set({
-      status: 'idle',
-      lastTransitionAt: new Date().toISOString()
-    }),
+  setError: (error: AudioErrorState | null) =>
+    set({ error, status: error ? 'idle' : 'idle' }),
 
   resetToIdle: () =>
     set({
       status: 'idle',
-      transcriptText: '',
-      lastTransitionAt: new Date().toISOString()
+      audioLevel: 0,
+      error: null
     })
 }))
