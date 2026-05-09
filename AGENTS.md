@@ -4,12 +4,25 @@ Desktop speech-to-text app. Record with a global hotkey, get refined text on you
 
 ## Stack
 
-- **Desktop:** Electron + Vite + React + TypeScript (strict)
+- **Desktop:** Electron + Vite + React + TypeScript (strict) — `apps/desktop/`
 - **State:** Zustand (prefer over Context for lightness)
 - **Styling:** Tailwind CSS
 - **STT:** Deepgram SDK via WebSocket (streaming real-time)
 - **Refinement:** LLM (Llama 3 via Groq or GPT-4o-mini via OpenAI) — called from Supabase Edge Functions
-- **Backend:** Supabase (PostgreSQL + RLS, Auth, Edge Functions in Deno, Realtime)
+- **Backend:** Supabase — `supabase/` (PostgreSQL + RLS, Auth, Edge Functions in Deno, Realtime)
+- **Shared types:** `packages/shared/`
+
+## Structure
+
+```
+monolog/
+├── apps/
+│   └── desktop/        # Electron desktop app
+├── packages/
+│   └── shared/         # Shared TypeScript types
+├── specs/              # Feature specifications
+├── supabase/           # Edge Functions + migrations
+```
 
 ## Key Conventions
 
@@ -18,7 +31,8 @@ Desktop speech-to-text app. Record with a global hotkey, get refined text on you
 - **Refined text** is auto-copied to clipboard after processing
 - **API keys** (`DEEPGRAM_KEY`, `SUPABASE_KEY`) must NEVER be in renderer — use Main Process proxy or Edge Functions
 - **Audio is transient;** only refined text is persisted to Supabase
-- **Mobile:** React Native/Expo app consuming same Supabase backend (same DB schema, Realtime sync)
+- **Mobile:** React Native/Expo app consuming same Supabase backend (same DB schema, Realtime sync) — `apps/mobile/` (future)
+- **Deps:** `npm install` from root (npm workspaces); run commands with `npm run <script> -w apps/desktop` or `npm run dev` from root (proxied)
 
 ## Architecture Flow
 
