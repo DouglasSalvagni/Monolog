@@ -28,11 +28,11 @@ description: "Task list for Electron App Shell feature implementation"
 
 **Purpose**: Project initialization and basic structure
 
-- [ ] T001 Scaffold project with `npm create @quick-start/electron@latest monolog -- --template react-ts`
-- [ ] T002 [P] Install Zustand dependency (`npm install zustand`)
-- [ ] T003 [P] Install and configure Tailwind CSS v4 (`npm install -D tailwindcss @tailwindcss/vite`) in `electron.vite.config.ts`
-- [ ] T004 [P] Create tray icon PNG assets (16x16 idle and recording) in `src/renderer/src/assets/`
-- [ ] T005 [P] Setup `resources/icon.png` (256x256 app icon for packaging)
+- [x] T001 Scaffold project with `npm create @quick-start/electron@latest monolog -- --template react-ts`
+- [x] T002 [P] Install Zustand dependency (`npm install zustand`)
+- [x] T003 [P] Install and configure Tailwind CSS v4 (`npm install -D tailwindcss @tailwindcss/vite`) in `electron.vite.config.ts`
+- [x] T004 [P] Create tray icon PNG assets (16x16 idle and recording) in `src/renderer/src/assets/`
+- [x] T005 [P] Setup `resources/icon.png` (256x256 app icon for packaging)
 
 ---
 
@@ -42,9 +42,9 @@ description: "Task list for Electron App Shell feature implementation"
 
 **⚠️ CRITICAL**: No user story work can begin until this phase is complete
 
-- [ ] T006 Create Zustand recording store in `src/renderer/src/store/recordingStore.ts` with status, transcriptText, and actions (startRecording, stopRecording, setTranscript, finishProcessing, resetToIdle)
-- [ ] T007 [P] Setup preload IPC bridge in `src/preload/index.ts` exposing contextBridge API for recording channels
-- [ ] T008 [P] Create IPC type declarations in `src/preload/index.d.ts` matching the contracts in `contracts/ipc-contracts.md`
+- [x] T006 Create Zustand recording store in `src/renderer/src/store/recordingStore.ts` with status, transcriptText, and actions (startRecording, stopRecording, setTranscript, finishProcessing, resetToIdle)
+- [x] T007 [P] Setup preload IPC bridge in `src/preload/index.ts` exposing contextBridge API for recording channels
+- [x] T008 [P] Create IPC type declarations in `src/preload/index.d.ts` matching the contracts in `contracts/ipc-contracts.md`
 
 **Checkpoint**: Foundation ready — user story implementation can now begin in parallel
 
@@ -58,9 +58,9 @@ description: "Task list for Electron App Shell feature implementation"
 
 ### Implementation for User Story 1
 
-- [ ] T009 [P] [US1] Create tray module in `src/main/tray.ts` with idle/recording icons and context menu (Show/Hide, Quit)
-- [ ] T010 [US1] Integrate tray with main process in `src/main/index.ts` — create tray on app ready, destroy on quit
-- [ ] T011 [US1] Implement window close → tray minimize behavior (hide window instead of quitting) in `src/main/index.ts`
+- [x] T009 [P] [US1] Create tray module in `src/main/tray.ts` with idle/recording icons and context menu (Show/Hide, Quit)
+- [x] T010 [US1] Integrate tray with main process in `src/main/index.ts` — create tray on app ready, destroy on quit
+- [x] T011 [US1] Implement window close → tray minimize behavior (hide window instead of quitting) in `src/main/index.ts`
 
 **Checkpoint**: At this point, User Story 1 should be fully functional and testable independently.
 
@@ -74,9 +74,9 @@ description: "Task list for Electron App Shell feature implementation"
 
 ### Implementation for User Story 2
 
-- [ ] T012 [P] [US2] Create shortcuts module in `src/main/shortcuts.ts` registering `Alt+Shift+R` via electron globalShortcut
-- [ ] T013 [US2] Wire hotkey to send `recording:started` / `recording:stopped` IPC events to renderer from `src/main/shortcuts.ts`
-- [ ] T014 [US2] Connect hotkey state changes to tray icon switching via `tray.setImage()` in `src/main/tray.ts`
+- [x] T012 [P] [US2] Create shortcuts module in `src/main/shortcuts.ts` registering `Alt+Shift+R` via electron globalShortcut
+- [x] T013 [US2] Wire hotkey to send `recording:started` / `recording:stopped` IPC events to renderer from `src/main/shortcuts.ts`
+- [x] T014 [US2] Connect hotkey state changes to tray icon switching via `tray.setImage()` in `src/main/tray.ts`
 
 **Checkpoint**: User Stories 1 AND 2 should both work independently.
 
@@ -90,9 +90,9 @@ description: "Task list for Electron App Shell feature implementation"
 
 ### Implementation for User Story 3
 
-- [ ] T015 [P] [US3] Create RecordingOverlay component in `src/renderer/src/components/RecordingOverlay.tsx` — frameless popup with state-dependent text
-- [ ] T016 [P] [US3] Create StatusIndicator component in `src/renderer/src/components/StatusIndicator.tsx` — small badge showing current state
-- [ ] T017 [US3] Wire overlay to Zustand store and IPC events in `src/renderer/src/App.tsx` — subscribe to `recording:state-changed` IPC event
+- [x] T015 [P] [US3] Create RecordingOverlay component in `src/renderer/src/components/RecordingOverlay.tsx` — frameless popup with state-dependent text
+- [x] T016 [P] [US3] Create StatusIndicator component in `src/renderer/src/components/StatusIndicator.tsx` — small badge showing current state
+- [x] T017 [US3] Wire overlay to Zustand store and IPC events in `src/renderer/src/App.tsx` — subscribe to `recording:state-changed` IPC event
 
 **Checkpoint**: User Stories 1-3 should all work independently.
 
@@ -106,9 +106,9 @@ description: "Task list for Electron App Shell feature implementation"
 
 ### Implementation for User Story 4
 
-- [ ] T018 [P] [US4] Implement mock processing timer in `src/renderer/src/store/recordingStore.ts` (2s setTimeout simulating LLM refinement)
-- [ ] T019 [US4] Implement clipboard write using `navigator.clipboard.writeText()` on processing complete in `src/renderer/src/App.tsx`
-- [ ] T020 [US4] Full cycle integration — ensure idle → recording → processing → clipboard → idle flows correctly end-to-end
+- [x] T018 [P] [US4] Implement mock processing timer in `src/renderer/src/store/recordingStore.ts` (2s setTimeout simulating LLM refinement)
+- [x] T019 [US4] Implement clipboard write using `navigator.clipboard.writeText()` on processing complete in `src/renderer/src/App.tsx`
+- [x] T020 [US4] Full cycle integration — ensure idle → recording → processing → clipboard → idle flows correctly end-to-end
 
 **Checkpoint**: All user stories should now be independently functional.
 
@@ -118,9 +118,9 @@ description: "Task list for Electron App Shell feature implementation"
 
 **Purpose**: Improvements that affect multiple user stories
 
-- [ ] T021 [P] Verify all checklist items from `quickstart.md` pass
-- [ ] T022 Run the app and validate no console errors or unhandled rejections
-- [ ] T023 Verify app stays under 150MB RAM in idle state (`SC-005`)
+- [x] T021 [P] Verify all checklist items from `quickstart.md` pass
+- [x] T022 Run the app and validate no console errors or unhandled rejections
+- [x] T023 Verify app stays under 150MB RAM in idle state (`SC-005`)
 
 ---
 

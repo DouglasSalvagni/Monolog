@@ -1,0 +1,110 @@
+import {
+  app,
+  shell,
+  BrowserWindow,
+  ipcMain,
+  clipboard
+} from 'electron'
+import { join } from 'path'
+import { electronApp, optimizer, is } from '@electron-toolkit/utils'
+import icon from '../../resources/icon.png?asset'
+import { createTray, setTrayIdle, destroyTray } from './tray'
+import { registerShortcuts, unregisterShortcuts } from './shortcuts'
+import { setMainWindow, resetRecording, toggleRecording } from './recording'
+
+let mainWindow: BrowserWindow | null = null
+let isQuitting = false
+
+function createWindow(): void {
+  mainWindow = new BrowserWindow({
+    width: 900,
+    height: 670,
+    show: false,
+    autoHideMenuBar: true,
+    ...(process.platform === 'linux' ? { icon } : {}),
+    webPreferences: {
+      preload: join(__dirname, '../preload/index.js'),
+      sandbox: false
+    }
+  })
+
+  setMainWindow(mainWindow)
+
+  mainWindow.on('ready-to-show', () => {
+    mainWindow?.show()
+  })
+
+  mainWindow.on('close', (event) => {
+    if (!isQuitting) {
+      event.preventDefault()
+      mainWindow?.hide()
+    }
+  })
+
+  mainWindow.webContents.setWindowOpenHandler((details) => {
+    shell.openExternal(details.url)
+    return { action: 'deny' }
+  })
+
+  if (is.dev && process.env['ELECTRON_RENDERER_URL']) {
+    mainWindow.loadURL(process.env['ELECTRON_RENDERER_URL'])
+  } else {
+    mainWindow.loadFile(join(__dirname, '../renderer/index.html'))
+  }
+}
+
+function registerIpcHandlers(): void {
+  ipcMain.on('app:show-window', () => {
+    if (mainWindow) {
+      mainWindow.show()
+      mainWindow.focus()
+    }
+  })
+
+  ipcMain.on('app:quit', () => {
+    isQuitting = true
+    app.quit()
+  })
+
+  ipcMain.on('clipboard:write', (_event, { text }: { text: string }) => {
+    clipboard.writeText(text)
+  })
+
+  ipcMain.on('recording:toggle', () => {
+    console.log('[main] received recording:toggle from renderer')
+    toggleRecording()
+  })
+}
+
+app.whenReady().then(() => {
+  electronApp.setAppUserModelId('com.monolog')
+
+  app.on('browser-window-created', (_, window) => {
+    optimizer.watchWindowShortcuts(window)
+  })
+
+  registerIpcHandlers()
+  createWindow()
+  createTray()
+  setTrayIdle()
+  registerShortcuts()
+
+  app.on('activate', () => {
+    if (BrowserWindow.getAllWindows().length === 0) {
+      createWindow()
+    } else {
+      mainWindow?.show()
+    }
+  })
+})
+
+app.on('window-all-closed', () => {
+  // Keep running in tray — don't quit on window close
+})
+
+app.on('before-quit', () => {
+  isQuitting = true
+  resetRecording()
+  unregisterShortcuts()
+  destroyTray()
+})
