@@ -10,6 +10,8 @@ function App(): React.JSX.Element {
   const setError = useRecordingStore((s) => s.setError)
   const setInterimText = useRecordingStore((s) => s.setInterimText)
   const setFinalText = useRecordingStore((s) => s.setFinalText)
+  const clearFinalText = useRecordingStore((s) => s.clearFinalText)
+  const finalText = useRecordingStore((s) => s.finalText)
   const isIdle = status === 'idle'
   const isRecording = status === 'recording'
   const hasIPC = typeof window.api?.toggleRecording === 'function'
@@ -24,14 +26,12 @@ function App(): React.JSX.Element {
 
     cleanups.push(
       window.api.onRecordingStarted(() => {
-        console.log('[renderer] received recording:started')
         startRecording()
       })
     )
 
     cleanups.push(
       window.api.onRecordingStopped(() => {
-        console.log('[renderer] received recording:stopped')
         stopRecording()
       })
     )
@@ -74,7 +74,6 @@ function App(): React.JSX.Element {
       cleanups.push(
         window.api.onTranscriptionFinal((text) => {
           setFinalText(text)
-          console.log('[renderer] final transcription:', text)
         })
       )
     }
@@ -83,6 +82,15 @@ function App(): React.JSX.Element {
       cleanups.forEach((c) => c())
     }
   }, [hasIPC, startRecording, stopRecording, setAudioLevel, setError, setInterimText, setFinalText])
+
+  const handleCopy = (): void => {
+    if (!finalText) return
+    if (hasIPC) {
+      window.api.writeClipboard(finalText)
+    } else {
+      navigator.clipboard.writeText(finalText).catch(console.error)
+    }
+  }
 
   const handleToggle = (): void => {
     if (hasIPC) {
@@ -107,7 +115,8 @@ function App(): React.JSX.Element {
   return (
     <div className="flex h-screen w-screen select-none flex-col items-center justify-center bg-gray-50">
       <RecordingOverlay />
-      <div className="flex flex-col items-center gap-6">
+
+      <div className="flex flex-col items-center gap-6 max-w-2xl w-full px-6">
         <h1 className="text-3xl font-bold tracking-tight text-gray-900">Monolog</h1>
 
         <p className="text-sm text-gray-500">
@@ -135,6 +144,28 @@ function App(): React.JSX.Element {
           <span className={`h-3 w-3 rounded-full ${isIdle ? 'bg-white' : 'bg-white/80'}`} />
           {isIdle ? 'Start Recording' : 'Stop Recording'}
         </button>
+
+        {isIdle && finalText && (
+          <div className="w-full bg-white rounded-lg border border-gray-200 shadow-sm p-4">
+            <p className="text-sm text-gray-700 leading-relaxed whitespace-pre-wrap break-words">
+              {finalText}
+            </p>
+            <div className="flex gap-2 mt-3 pt-3 border-t border-gray-100">
+              <button
+                onClick={handleCopy}
+                className="flex items-center gap-1 rounded-md bg-blue-500 px-3 py-1.5 text-xs font-medium text-white hover:bg-blue-600 transition-colors active:scale-95"
+              >
+                Copy
+              </button>
+              <button
+                onClick={clearFinalText}
+                className="rounded-md bg-gray-100 px-3 py-1.5 text-xs font-medium text-gray-600 hover:bg-gray-200 transition-colors"
+              >
+                Clear
+              </button>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   )

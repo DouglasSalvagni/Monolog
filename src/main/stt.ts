@@ -12,6 +12,8 @@ let ws: WebSocket | null = null
 let listener: SttListener | null = null
 let apiKey: string = ''
 let pendingChunks: Buffer[] = []
+let finalTimeout: ReturnType<typeof setTimeout> | null = null
+let lastText = ''
 
 export function setSttListener(l: SttListener | null): void {
   listener = l
@@ -38,6 +40,11 @@ function buildUrl(): string {
 
 export function startTranscription(): void {
   pendingChunks = []
+  lastText = ''
+  if (finalTimeout) {
+    clearTimeout(finalTimeout)
+    finalTimeout = null
+  }
 
   try {
     const url = buildUrl()
@@ -56,25 +63,21 @@ export function startTranscription(): void {
     ws.on('message', (data: WebSocket.Data) => {
       try {
         const msg = JSON.parse(data.toString())
-        console.log(
-          '[stt] msg type:',
-          msg.type,
-          'event:',
-          msg.channel?.alternatives?.[0]?.transcript?.slice(0, 50)
-        )
+        if (msg.type !== 'Results') return
 
-        if (msg.type === 'Results') {
-          const alt = msg.channel?.alternatives?.[0]
-          if (!alt) return
-          const text = (alt.transcript || '').trim()
-          if (!text) return
+        const alt = msg.channel?.alternatives?.[0]
+        if (!alt) return
+        const text = (alt.transcript || '').trim()
 
-          if (alt.is_final) {
-            console.log('[stt] final:', text)
+        if (msg.is_final) {
+          console.log('[stt] final:', text)
+          if (text) {
+            lastText = text
             listener?.onFinal?.(text)
-          } else {
-            listener?.onInterim?.(text)
           }
+        } else if (text) {
+          lastText = text
+          listener?.onInterim?.(text)
         }
       } catch {
         // ignore parse errors
@@ -86,8 +89,8 @@ export function startTranscription(): void {
       listener?.onError?.(err)
     })
 
-    ws.on('close', (code: number, reason: string) => {
-      console.log(`[stt] websocket closed (${code}): ${reason}`)
+    ws.on('close', () => {
+      console.log('[stt] websocket closed')
       ws = null
     })
 
@@ -115,8 +118,31 @@ export function sendAudioChunk(chunk: Buffer): void {
   }
 }
 
+export function requestFinal(): void {
+  if (!ws || ws.readyState !== WebSocket.OPEN) return
+
+  try {
+    ws.send(JSON.stringify({ type: 'CloseStream' }))
+  } catch {
+    // best effort
+  }
+
+  const finalText = lastText
+  if (finalText) {
+    listener?.onFinal?.(finalText)
+  }
+
+  finalTimeout = setTimeout(() => {
+    stopTranscription()
+  }, 1000)
+}
+
 export function stopTranscription(): void {
   pendingChunks = []
+  if (finalTimeout) {
+    clearTimeout(finalTimeout)
+    finalTimeout = null
+  }
   if (ws) {
     try {
       ws.close()
@@ -125,6 +151,7 @@ export function stopTranscription(): void {
     }
     ws = null
   }
+  lastText = ''
 }
 
 export function cleanupSTT(): void {

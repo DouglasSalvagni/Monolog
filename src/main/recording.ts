@@ -11,6 +11,7 @@ import {
 import {
   startTranscription,
   sendAudioChunk,
+  requestFinal,
   stopTranscription,
   setSttListener,
   cleanupSTT,
@@ -18,7 +19,6 @@ import {
 } from './stt'
 
 let mainWindow: BrowserWindow | null = null
-let finalTranscript = ''
 
 export function setMainWindow(win: BrowserWindow | null): void {
   mainWindow = win
@@ -43,7 +43,8 @@ function onInterim(text: string): void {
 }
 
 function onFinal(text: string): void {
-  finalTranscript = text
+  clipboard.writeText(text)
+  console.log(`[recording] final: "${text}"`)
   send('transcription:final', { text })
 }
 
@@ -69,40 +70,19 @@ export function initRecording(apiKey: string): void {
   setListener({
     onLevel,
     onChunk,
-    onError: onAudioError,
-    onStop: onStop
+    onError: onAudioError
   })
-}
-
-function onStop(): void {
-  send('recording:stopped')
-  send('recording:state-changed', { status: 'idle' })
-  setTrayIdle()
 }
 
 export function toggleRecording(): void {
   if (isRecording()) {
-    const buf = stopCapture()
-    const final = finalTranscript
-    finalTranscript = ''
+    stopCapture()
+    requestFinal()
 
-    if (buf) {
-      const dur = (buf.length / 32000).toFixed(1)
-      console.log(`[recording] captured ${buf.length} bytes (${dur}s)`)
-    }
-
-    if (final) {
-      console.log(`[recording] final transcript: "${final}"`)
-      clipboard.writeText(final)
-      console.log('[recording] copied to clipboard')
-    }
-
-    stopTranscription()
     send('recording:stopped')
     send('recording:state-changed', { status: 'idle' })
     setTrayIdle()
   } else {
-    finalTranscript = ''
     stopTranscription()
 
     const started = startCapture()
