@@ -1,6 +1,8 @@
-import { useEffect } from 'react'
+import { useEffect, useCallback } from 'react'
 import { RecordingOverlay } from './components/RecordingOverlay'
+import { LoginScreen } from './components/LoginScreen'
 import { useRecordingStore } from './store/recordingStore'
+import { useAuthStore } from './store/authStore'
 
 function App(): React.JSX.Element {
   const status = useRecordingStore((s) => s.status)
@@ -17,6 +19,52 @@ function App(): React.JSX.Element {
   const isIdle = status === 'idle'
   const isRecording = status === 'recording'
   const hasIPC = typeof window.api?.toggleRecording === 'function'
+
+  const authUser = useAuthStore((s) => s.user)
+  const authLoading = useAuthStore((s) => s.loading)
+  const authError = useAuthStore((s) => s.error)
+  const setUser = useAuthStore((s) => s.setUser)
+  const setAuthLoading = useAuthStore((s) => s.setLoading)
+  const setAuthError = useAuthStore((s) => s.setError)
+
+  const handleLogin = useCallback(
+    async (email: string, password: string) => {
+      setAuthLoading(true)
+      try {
+        const result = await window.api.login(email, password)
+        if (result.error) {
+          setAuthError(result.error)
+        } else {
+          setUser(result.user)
+        }
+      } catch {
+        setAuthError('Connection failed')
+      }
+    },
+    [setUser, setAuthLoading, setAuthError]
+  )
+
+  const handleSignup = useCallback(
+    async (email: string, password: string) => {
+      setAuthLoading(true)
+      try {
+        const result = await window.api.signup(email, password)
+        if (result.error) {
+          setAuthError(result.error)
+        } else {
+          setUser(result.user)
+        }
+      } catch {
+        setAuthError('Connection failed')
+      }
+    },
+    [setUser, setAuthLoading, setAuthError]
+  )
+
+  const handleLogout = useCallback(async () => {
+    await window.api.logout()
+    setUser(null)
+  }, [setUser])
 
   useEffect(() => {
     if (!hasIPC) {
@@ -101,8 +149,25 @@ function App(): React.JSX.Element {
     setError,
     setInterimText,
     setFinalText,
-    setRefinedText
+    setRefinedText,
+    setUser,
+    setAuthLoading
   ])
+
+  useEffect(() => {
+    if (!window.api?.restoreSession) return
+    window.api.restoreSession().then((user) => {
+      setUser(user)
+    })
+  }, [setUser, setAuthLoading])
+
+  useEffect(() => {
+    if (!window.api?.onAuthStateChanged) return
+    const cleanup = window.api.onAuthStateChanged((user) => {
+      setUser(user)
+    })
+    return cleanup
+  }, [setUser])
 
   const handleCopy = (): void => {
     const text = refinedText || finalText
@@ -136,11 +201,40 @@ function App(): React.JSX.Element {
 
   const showResult = isIdle && finalText
 
+  if (authLoading) {
+    return (
+      <div className="flex h-screen w-screen select-none flex-col items-center justify-center bg-gray-50">
+        <p className="text-sm text-gray-500">Loading...</p>
+      </div>
+    )
+  }
+
+  if (!authUser) {
+    return (
+      <LoginScreen
+        onLogin={handleLogin}
+        onSignup={handleSignup}
+        error={authError}
+        loading={authLoading}
+      />
+    )
+  }
+
   return (
     <div className="flex h-screen w-screen select-none flex-col items-center justify-center bg-gray-50">
       <RecordingOverlay />
 
       <div className="flex flex-col items-center gap-6 max-w-2xl w-full px-6">
+        <div className="self-end flex items-center gap-2">
+          <span className="text-xs text-gray-400">{authUser.email}</span>
+          <button
+            onClick={handleLogout}
+            className="text-xs text-gray-400 hover:text-gray-600"
+          >
+            Logout
+          </button>
+        </div>
+
         <h1 className="text-3xl font-bold tracking-tight text-gray-900">Monolog</h1>
 
         <p className="text-sm text-gray-500">

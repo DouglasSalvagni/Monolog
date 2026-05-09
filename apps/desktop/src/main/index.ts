@@ -8,7 +8,7 @@ import icon from '../../resources/icon.png?asset'
 import { createTray, setTrayIdle, destroyTray } from './tray'
 import { registerShortcuts, unregisterShortcuts } from './shortcuts'
 import { setMainWindow, resetRecording, toggleRecording, initRecording } from './recording'
-import { initSupabase } from './supabase'
+import { initSupabase, signUp, signIn, signOut, restoreSession, onAuthChange } from './supabase'
 
 let mainWindow: BrowserWindow | null = null
 let isQuitting = false
@@ -82,6 +82,23 @@ function registerIpcHandlers(): void {
     console.log('[main] received audio:stop-capture')
     toggleRecording()
   })
+
+  ipcMain.handle('auth:login', async (_event, { email, password }: { email: string; password: string }) => {
+    return signIn(email, password)
+  })
+
+  ipcMain.handle('auth:signup', async (_event, { email, password }: { email: string; password: string }) => {
+    return signUp(email, password)
+  })
+
+  ipcMain.handle('auth:logout', async () => {
+    await signOut()
+  })
+
+  ipcMain.handle('auth:restore-session', async () => {
+    const user = await restoreSession()
+    return user ? { id: user.id, email: user.email || '' } : null
+  })
 }
 
 app.whenReady().then(() => {
@@ -113,6 +130,11 @@ app.whenReady().then(() => {
   if (supabaseUrl && supabaseAnonKey) {
     initSupabase(supabaseUrl, supabaseAnonKey)
     console.log('[main] Supabase initialized')
+
+    onAuthChange((user) => {
+      const payload = user ? { id: user.id, email: user.email || '' } : null
+      mainWindow?.webContents.send('auth:state-changed', payload)
+    })
   } else {
     console.warn('[main] SUPABASE_URL or SUPABASE_ANON_KEY not set — backend features disabled')
   }

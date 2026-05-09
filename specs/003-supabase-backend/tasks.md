@@ -49,12 +49,12 @@
 
 ### Implementation
 
-- [ ] T012 [P] [US1] Create `apps/desktop/src/renderer/src/store/authStore.ts` — Zustand store with `user`, `loading`, `error` state
-- [ ] T013 [P] [US1] Create `apps/desktop/src/renderer/src/components/LoginScreen.tsx` — email/password form with signup/login toggle and error display
-- [ ] T014 [US1] Add auth IPC handlers in `apps/desktop/src/main/index.ts` for `auth:login`, `auth:signup`, `auth:logout`, `auth:restore-session`
-- [ ] T015 [P] [US1] Add auth IPC listeners in `apps/desktop/src/preload/index.ts` + update `apps/desktop/src/preload/index.d.ts`
+- [X] T012 [P] [US1] Create `apps/desktop/src/renderer/src/store/authStore.ts` — Zustand store with `user`, `loading`, `error` state
+- [X] T013 [P] [US1] Create `apps/desktop/src/renderer/src/components/LoginScreen.tsx` — email/password form with signup/login toggle and error display
+- [X] T014 [US1] Add auth IPC handlers in `apps/desktop/src/main/index.ts` for `auth:login`, `auth:signup`, `auth:logout`, `auth:restore-session`
+- [X] T015 [P] [US1] Add auth IPC listeners in `apps/desktop/src/preload/index.ts` + update `apps/desktop/src/preload/index.d.ts`
 - [X] T016 [US1] Implement Supabase Auth methods in `apps/desktop/src/main/supabase.ts` — `login()`, `signup()`, `logout()`, `restoreSession()`, `onAuthStateChange()`
-- [ ] T017 [US1] Integrate auth store + LoginScreen into `apps/desktop/src/renderer/src/App.tsx` — show LoginScreen when not authenticated
+- [X] T017 [US1] Integrate auth store + LoginScreen into `apps/desktop/src/renderer/src/App.tsx` — show LoginScreen when not authenticated
 
 **Checkpoint**: US1 complete — user can create account, log in, session persists, logout works.
 

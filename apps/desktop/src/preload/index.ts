@@ -66,7 +66,27 @@ const api = {
 
   startCapture: (): void => ipcRenderer.send('audio:start-capture'),
 
-  stopCapture: (): void => ipcRenderer.send('audio:stop-capture')
+  stopCapture: (): void => ipcRenderer.send('audio:stop-capture'),
+
+  onAuthStateChanged: (callback: (user: { id: string; email: string } | null) => void): (() => void) => {
+    const handler = (
+      _event: Electron.IpcRendererEvent,
+      user: { id: string; email: string } | null
+    ): void => callback(user)
+    ipcRenderer.on('auth:state-changed', handler)
+    return () => ipcRenderer.removeListener('auth:state-changed', handler)
+  },
+
+  login: (email: string, password: string): Promise<{ user: { id: string; email: string } | null; error?: string }> =>
+    ipcRenderer.invoke('auth:login', { email, password }),
+
+  signup: (email: string, password: string): Promise<{ user: { id: string; email: string } | null; error?: string }> =>
+    ipcRenderer.invoke('auth:signup', { email, password }),
+
+  logout: (): Promise<void> => ipcRenderer.invoke('auth:logout'),
+
+  restoreSession: (): Promise<{ id: string; email: string } | null> =>
+    ipcRenderer.invoke('auth:restore-session')
 }
 
 if (process.contextIsolated) {
