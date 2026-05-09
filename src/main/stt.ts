@@ -14,6 +14,7 @@ let apiKey: string = ''
 let pendingChunks: Buffer[] = []
 let finalTimeout: ReturnType<typeof setTimeout> | null = null
 let lastText = ''
+let finals: string[] = []
 
 export function setSttListener(l: SttListener | null): void {
   listener = l
@@ -41,6 +42,7 @@ function buildUrl(): string {
 export function startTranscription(): void {
   pendingChunks = []
   lastText = ''
+  finals = []
   if (finalTimeout) {
     clearTimeout(finalTimeout)
     finalTimeout = null
@@ -70,10 +72,12 @@ export function startTranscription(): void {
         const text = (alt.transcript || '').trim()
 
         if (msg.is_final) {
-          console.log('[stt] final:', text)
           if (text) {
-            lastText = text
-            listener?.onFinal?.(text)
+            console.log('[stt] final segment:', text)
+            if (!finals.includes(text)) {
+              finals.push(text)
+            }
+            lastText = finals.join(' ')
           }
         } else if (text) {
           lastText = text
@@ -119,17 +123,18 @@ export function sendAudioChunk(chunk: Buffer): void {
 }
 
 export function requestFinal(): void {
-  if (!ws || ws.readyState !== WebSocket.OPEN) return
-
-  try {
-    ws.send(JSON.stringify({ type: 'CloseStream' }))
-  } catch {
-    // best effort
+  if (ws && ws.readyState === WebSocket.OPEN) {
+    try {
+      ws.send(JSON.stringify({ type: 'CloseStream' }))
+    } catch {
+      // best effort
+    }
   }
 
-  const finalText = lastText
-  if (finalText) {
-    listener?.onFinal?.(finalText)
+  const result = lastText.trim()
+  if (result) {
+    console.log('[stt] final combined:', result)
+    listener?.onFinal?.(result)
   }
 
   finalTimeout = setTimeout(() => {
@@ -152,6 +157,7 @@ export function stopTranscription(): void {
     ws = null
   }
   lastText = ''
+  finals = []
 }
 
 export function cleanupSTT(): void {
