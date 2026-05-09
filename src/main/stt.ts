@@ -12,7 +12,6 @@ let client: DeepgramClient | null = null
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 let socket: any = null
 let listener: SttListener | null = null
-let apiKey: string = ''
 let pendingChunks: Buffer[] = []
 
 export function setSttListener(l: SttListener | null): void {
@@ -20,7 +19,6 @@ export function setSttListener(l: SttListener | null): void {
 }
 
 export function initSTT(key: string): void {
-  apiKey = key
   client = new DeepgramClient({ apiKey: key })
 }
 
@@ -41,13 +39,12 @@ export async function startTranscription(): Promise<void> {
   pendingChunks = []
 
   try {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const conn: any = await client.listen.v2.connect({
       model: 'flux-general-multi',
       encoding: 'linear16',
       sample_rate: SAMPLE_RATE,
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      Authorization: `Token ${apiKey}` as any,
+      Authorization: '' as any,
       queryParams: {
         smart_format: 'true',
         punctuate: 'true',
@@ -89,6 +86,7 @@ export async function startTranscription(): Promise<void> {
       socket = null
     })
 
+    conn.connect()
     console.log('[stt] transcription started')
   } catch (err) {
     const error = err instanceof Error ? err : new Error('Failed to start transcription')
