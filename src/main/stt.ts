@@ -74,13 +74,10 @@ export function startTranscription(): void {
         if (msg.is_final) {
           if (text) {
             console.log('[stt] final segment:', text)
-            if (!finals.includes(text)) {
-              finals.push(text)
-            }
+            finals.push(text)
             lastText = finals.join(' ')
           }
         } else if (text) {
-          lastText = text
           listener?.onInterim?.(text)
         }
       } catch {
@@ -131,15 +128,14 @@ export function requestFinal(): void {
     }
   }
 
-  const result = lastText.trim()
-  if (result) {
-    console.log('[stt] final combined:', result)
-    listener?.onFinal?.(result)
-  }
-
   finalTimeout = setTimeout(() => {
+    const result = lastText.trim()
+    if (result) {
+      console.log('[stt] final combined:', result)
+      listener?.onFinal?.(result)
+    }
     stopTranscription()
-  }, 1000)
+  }, 800)
 }
 
 export function stopTranscription(): void {
