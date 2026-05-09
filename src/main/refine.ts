@@ -51,6 +51,10 @@ export async function refineText(raw: string): Promise<string> {
   return refined
 }
 
+export function isRefineAvailable(): boolean {
+  return client !== null
+}
+
 export function cleanupRefine(): void {
   client = null
 }

@@ -17,7 +17,7 @@ import {
   cleanupSTT,
   initSTT
 } from './stt'
-import { initRefine, refineText, cleanupRefine } from './refine'
+import { initRefine, refineText, cleanupRefine, isRefineAvailable } from './refine'
 
 let mainWindow: BrowserWindow | null = null
 
@@ -46,6 +46,12 @@ function onInterim(text: string): void {
 function onFinal(text: string): void {
   console.log(`[recording] final: "${text}"`)
   send('transcription:final', { text })
+
+  if (!isRefineAvailable()) {
+    clipboard.writeText(text)
+    send('transcription:refined', { refined: text })
+    return
+  }
 
   refineText(text)
     .then((refined) => {

@@ -174,28 +174,12 @@ function App(): React.JSX.Element {
             <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-4">
               <div className="flex items-center justify-between mb-2">
                 <span className="text-xs font-medium text-gray-400 uppercase tracking-wide">
-                  {refinedText ? 'Refined' : 'Processing...'}
+                  {finalText && refinedText && finalText !== refinedText ? 'Refined' : 'Transcript'}
                 </span>
-                {!refinedText && (
-                  <span className="h-3 w-3 rounded-full bg-yellow-400 animate-pulse" />
-                )}
               </div>
               <p className="text-sm text-gray-700 leading-relaxed whitespace-pre-wrap break-words">
                 {refinedText || finalText}
               </p>
-              {!refinedText && (
-                <div className="mt-2 flex gap-1">
-                  <div className="h-1 flex-1 rounded-full bg-blue-400 animate-pulse" />
-                  <div
-                    className="h-1 flex-1 rounded-full bg-blue-400 animate-pulse"
-                    style={{ animationDelay: '0.2s' }}
-                  />
-                  <div
-                    className="h-1 flex-1 rounded-full bg-blue-400 animate-pulse"
-                    style={{ animationDelay: '0.4s' }}
-                  />
-                </div>
-              )}
             </div>
 
             {finalText && refinedText && finalText !== refinedText && (
