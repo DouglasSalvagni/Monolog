@@ -47,7 +47,12 @@ export async function startTranscription(): Promise<void> {
       encoding: 'linear16',
       sample_rate: SAMPLE_RATE,
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      Authorization: `Token ${apiKey}` as any
+      Authorization: `Token ${apiKey}` as any,
+      queryParams: {
+        smart_format: 'true',
+        punctuate: 'true',
+        interim_results: 'true'
+      }
     })
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -58,22 +63,21 @@ export async function startTranscription(): Promise<void> {
       flushPending()
     })
 
-    conn.on(
-      'message',
-      (msg: { type: string; transcript?: string; event?: string }) => {
-        if (msg.type === 'TurnInfo') {
-          const text = msg.transcript?.trim() || ''
-          if (!text) return
+    conn.on('message', (msg: Record<string, unknown>) => {
+      console.log('[stt] msg type:', msg.type, 'event:', (msg as { event?: string }).event)
+      if (msg.type === 'TurnInfo') {
+        const text = ((msg as { transcript?: string }).transcript || '').trim()
+        if (!text) return
 
-          if (msg.event === 'EndOfTurn' || msg.event === 'EagerEndOfTurn') {
-            console.log('[stt] final:', text)
-            listener?.onFinal?.(text)
-          } else {
-            listener?.onInterim?.(text)
-          }
+        const event = (msg as { event?: string }).event
+        if (event === 'EndOfTurn' || event === 'EagerEndOfTurn') {
+          console.log('[stt] final:', text)
+          listener?.onFinal?.(text)
+        } else {
+          listener?.onInterim?.(text)
         }
       }
-    )
+    })
 
     conn.on('error', (err: Error) => {
       console.error('[stt] error:', err)
