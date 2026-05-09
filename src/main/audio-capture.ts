@@ -130,7 +130,7 @@ export function startCapture(): boolean {
 
   ai.on('error', (err: Error) => {
     emitError(err.message, 'STREAM_ERROR')
-    stopCapture()
+    cleanup()
   })
 
   ai.on('close', () => {
@@ -194,10 +194,10 @@ function startLevelTimer(): void {
 
 function startSafetyTimer(): void {
   safetyTimer = setTimeout(() => {
+    emitError('Tempo máximo de gravação atingido (10 minutos).', 'STREAM_ERROR')
     listener?.onLevel?.(0)
     listener?.onStop?.()
-    emitError('Tempo máximo de gravação atingido (10 minutos).', 'STREAM_ERROR')
-    stopCapture()
+    cleanup()
   }, MAX_DURATION_MS)
 }
 

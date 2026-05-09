@@ -80,13 +80,13 @@
 
 ### Implementation
 
-- [ ] T017 [P] [US3] Add device check in audio-capture.ts — enumerate devices with getDevices() before start, emit typed error codes (DEVICE_NOT_FOUND, PERMISSION_DENIED, STREAM_ERROR, AUDIO_SYSTEM_UNAVAILABLE)
-- [ ] T018 [P] [US3] Add audio:error IPC channel to src/main/index.ts — forward error events to renderer
-- [ ] T019 [P] [US3] Add audio:error listener in src/preload/index.ts and update src/preload/index.d.ts types
-- [ ] T020 [P] [US3] Add error state fields (errorMessage, errorCode) to Zustand store in src/renderer/src/store/recordingStore.ts
-- [ ] T021 [US3] Add error display UI in src/renderer/src/components/RecordingOverlay.tsx — show error message with dismiss
-- [ ] T022 [US3] Wire audio:error IPC → store → overlay in src/renderer/src/App.tsx
-- [ ] T023 [US3] Handle mid-recording device disconnection in audio-capture.ts (stream error event → emit error → cleanup)
+- [X] T017 [P] [US3] Add device check in audio-capture.ts — enumerate devices with getDevices() before start, emit typed error codes (DEVICE_NOT_FOUND, PERMISSION_DENIED, STREAM_ERROR, AUDIO_SYSTEM_UNAVAILABLE)
+- [X] T018 [P] [US3] Add audio:error IPC channel to src/main/index.ts — forward error events to renderer
+- [X] T019 [P] [US3] Add audio:error listener in src/preload/index.ts and update src/preload/index.d.ts types
+- [X] T020 [P] [US3] Add error state fields (errorMessage, errorCode) to Zustand store in src/renderer/src/store/recordingStore.ts
+- [X] T021 [US3] Add error display UI in src/renderer/src/components/RecordingOverlay.tsx — show error message with dismiss
+- [X] T022 [US3] Wire audio:error IPC → store → overlay in src/renderer/src/App.tsx
+- [X] T023 [US3] Handle mid-recording device disconnection in audio-capture.ts (stream error event → emit error → cleanup)
 
 **Checkpoint**: US3 complete — all error scenarios handled gracefully.
 
