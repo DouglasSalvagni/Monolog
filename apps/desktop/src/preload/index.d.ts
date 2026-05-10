@@ -8,6 +8,7 @@ interface AudioErrorPayload {
 interface AuthResult {
   user: { id: string; email: string } | null
   error?: string
+  needsEmailConfirmation?: boolean
 }
 
 interface RecordingApi {

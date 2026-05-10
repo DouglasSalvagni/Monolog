@@ -88,7 +88,12 @@ function registerIpcHandlers(): void {
   })
 
   ipcMain.handle('auth:signup', async (_event, { email, password }: { email: string; password: string }) => {
-    return signUp(email, password)
+    const result = await signUp(email, password)
+    return {
+      user: result.user ? { id: result.user.id, email: result.user.email || '' } : null,
+      error: result.error,
+      needsEmailConfirmation: result.needsEmailConfirmation
+    }
   })
 
   ipcMain.handle('auth:logout', async () => {

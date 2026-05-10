@@ -51,6 +51,8 @@ function App(): React.JSX.Element {
         const result = await window.api.signup(email, password)
         if (result.error) {
           setAuthError(result.error)
+        } else if (result.needsEmailConfirmation) {
+          setAuthError('Conta criada! Verifique seu email para confirmar o cadastro antes de fazer login.')
         } else {
           setUser(result.user)
         }
