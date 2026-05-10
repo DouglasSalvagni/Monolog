@@ -11,3 +11,5 @@ out
 .vite/
 .wing/
 release/
+.agents/
+skills-lock.json
