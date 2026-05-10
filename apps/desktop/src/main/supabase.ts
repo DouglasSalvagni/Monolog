@@ -1,5 +1,4 @@
 import { createClient, type SupabaseClient, type User } from '@supabase/supabase-js'
-import { clipboard } from 'electron'
 
 let supabase: SupabaseClient | null = null
 let authCallback: ((user: User | null) => void) | null = null
@@ -55,7 +54,6 @@ export async function callRefineEdgeFunction(
   if (error) return { refinedText: '', error: error.message }
   if (!data.success) return { refinedText: '', error: data.error || 'Unknown error' }
 
-  clipboard.writeText(data.data.refinedText)
   return { refinedText: data.data.refinedText }
 }
 

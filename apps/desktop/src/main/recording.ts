@@ -18,6 +18,7 @@ import {
   initSTT
 } from './stt'
 import { initRefine, refineText, cleanupRefine, isRefineAvailable } from './refine'
+import { callRefineEdgeFunction } from './supabase'
 
 let mainWindow: BrowserWindow | null = null
 
@@ -47,6 +48,27 @@ function onFinal(text: string): void {
   console.log(`[recording] final: "${text}"`)
   send('transcription:final', { text })
 
+  const duration = 0
+
+  callRefineEdgeFunction(text, duration)
+    .then(({ refinedText, error: edgeError }) => {
+      if (!edgeError && refinedText) {
+        console.log('[recording] edge function success:', refinedText)
+        clipboard.writeText(refinedText)
+        send('transcription:refined', { refined: refinedText })
+        return
+      }
+
+      console.log('[recording] edge function failed:', edgeError || 'no result')
+      fallbackRefine(text)
+    })
+    .catch((err) => {
+      console.log('[recording] edge function error, falling back:', err.message)
+      fallbackRefine(text)
+    })
+}
+
+function fallbackRefine(text: string): void {
   if (!isRefineAvailable()) {
     clipboard.writeText(text)
     send('transcription:refined', { refined: text })
@@ -56,11 +78,11 @@ function onFinal(text: string): void {
   refineText(text)
     .then((refined) => {
       clipboard.writeText(refined)
-      console.log(`[recording] refined: "${refined}"`)
+      console.log(`[recording] local refine: "${refined}"`)
       send('transcription:refined', { refined })
     })
     .catch((err) => {
-      console.error('[recording] refinement failed:', err.message)
+      console.error('[recording] local refine failed:', err.message)
       clipboard.writeText(text)
       send('transcription:refined', { refined: text })
     })

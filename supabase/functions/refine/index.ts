@@ -28,7 +28,7 @@ Deno.serve(async (req: Request) => {
     const { data: { user }, error: authError } = await supabase.auth.getUser()
     if (authError || !user) {
       return new Response(
-        JSON.stringify({ success: false, error: 'Unauthorized' }),
+        JSON.stringify({ success: false, error: 'Unauthorized: invalid token' }),
         { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       )
     }
@@ -84,7 +84,7 @@ Deno.serve(async (req: Request) => {
       throw new Error('Empty response from LLM')
     }
 
-    const { data: transcription, error: insertError } = await supabase
+    const { error: insertError } = await supabase
       .from('transcriptions')
       .insert({
         user_id: user.id,
@@ -92,8 +92,6 @@ Deno.serve(async (req: Request) => {
         refined_text: refinedText,
         duration_seconds: durationSeconds || 0
       })
-      .select('id, created_at')
-      .single()
 
     if (insertError) {
       throw new Error(`DB insert failed: ${insertError.message}`)
@@ -102,11 +100,7 @@ Deno.serve(async (req: Request) => {
     return new Response(
       JSON.stringify({
         success: true,
-        data: {
-          id: transcription.id,
-          refinedText,
-          createdAt: transcription.created_at
-        }
+        data: { refinedText }
       }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     )
