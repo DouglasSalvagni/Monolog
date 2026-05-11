@@ -235,113 +235,142 @@ function App(): React.JSX.Element {
     )
   }
 
+  if (showSettings) {
+    return <SettingsPage onBack={() => setShowSettings(false)} />
+  }
+
   return (
-    <div className="relative flex h-screen w-screen select-none flex-col items-center justify-center bg-gray-50">
+    <div className="relative flex h-screen w-screen select-none flex-col items-center justify-center bg-studio-bg overflow-hidden animate-in fade-in duration-700">
       <RecordingOverlay />
 
-      <div className="absolute right-4 top-4 flex items-center gap-2">
-        <span className="text-xs text-gray-400">{authUser.email}</span>
-        <button
-          onClick={handleLogout}
-          className="text-xs text-gray-400 hover:text-gray-600"
-        >
-          Logout
-        </button>
-        <button
-          onClick={() => setShowSettings(true)}
-          className="ml-2 rounded-full p-2 text-gray-400 hover:bg-gray-100 hover:text-gray-600 transition-all active:rotate-45"
-          title="Configurações"
-        >
-          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-            <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-          </svg>
-        </button>
+      {/* Floating Header */}
+      <div className="absolute top-0 left-0 right-0 p-8 flex items-center justify-between z-10">
+        <div className="flex items-center gap-3">
+          <div className="w-8 h-8 rounded-lg bg-studio-ink flex items-center justify-center">
+            <div className="w-1.5 h-4 bg-white rounded-full mx-0.5 animate-ink-pulse" />
+          </div>
+          <h1 className="text-sm font-bold tracking-widest uppercase text-studio-ink">Monolog</h1>
+        </div>
+        <div className="flex items-center gap-6">
+          <div className="flex flex-col items-end">
+            <span className="text-[10px] font-bold uppercase tracking-wider text-studio-ink/30">Current Account</span>
+            <span className="text-xs font-medium text-studio-ink/60">{authUser.email}</span>
+          </div>
+          <div className="flex items-center gap-2 border-l border-studio-metal pl-6">
+            <button
+              onClick={() => setShowSettings(true)}
+              className="rounded-full p-2 text-studio-ink/40 hover:bg-white hover:text-studio-ink hover:shadow-studio-soft transition-all active:scale-95"
+              title="Configurações"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+              </svg>
+            </button>
+            <button
+              onClick={handleLogout}
+              className="text-[10px] font-bold uppercase tracking-widest text-studio-red/60 hover:text-studio-red px-2"
+            >
+              Sign Out
+            </button>
+          </div>
+        </div>
       </div>
 
-      <div className="flex flex-col items-center gap-6 max-w-2xl w-full px-6">
+      <div className="flex flex-col items-center gap-12 max-w-3xl w-full px-12 pt-24 pb-12">
 
-        <h1 className="text-3xl font-bold tracking-tight text-gray-900">Monolog</h1>
-
-        <p className="text-sm text-gray-500">
-          Press{' '}
-          <kbd className="rounded border bg-gray-100 px-1.5 py-0.5 font-mono text-xs">
-            Alt+Shift+R
-          </kbd>{' '}
-          or click the button below
-        </p>
-
-        {!hasIPC && (
-          <p className="rounded bg-yellow-100 px-3 py-1 text-xs text-yellow-800">
-            Running without IPC bridge — using direct mode
+        <div className="flex flex-col items-center gap-4 text-center">
+          <p className="text-[11px] font-bold uppercase tracking-[0.3em] text-studio-ink/20">
+            Intelligent Speech-to-Text
           </p>
-        )}
-
-        <div className="flex items-center justify-center gap-4 w-full max-w-sm">
-          <SkillSelector />
+          <h2 className="text-4xl font-serif italic text-studio-ink">O que você está pensando agora?</h2>
         </div>
 
-        <button
-          onClick={handleToggle}
-          className={`flex items-center gap-2 rounded-full px-8 py-3 text-sm font-semibold text-white shadow-lg transition-all duration-200 active:scale-95 ${
-            isIdle
-              ? 'bg-red-500 hover:bg-red-600 hover:shadow-xl'
-              : 'bg-gray-500 hover:bg-gray-600 hover:shadow-xl'
-          }`}
-        >
-          <span className={`h-3 w-3 rounded-full ${isIdle ? 'bg-white' : 'bg-white/80'}`} />
-          {isIdle ? 'Start Recording' : 'Stop Recording'}
-        </button>
+        <div className="flex flex-col items-center gap-8 w-full">
+          <div className="flex items-center gap-3 p-1.5 rounded-full bg-white border border-studio-metal shadow-studio-soft">
+            <SkillSelector />
+            <button
+              onClick={handleToggle}
+              className={`flex items-center gap-2 rounded-full px-8 py-2.5 text-xs font-bold uppercase tracking-widest text-white shadow-lg transition-all duration-300 active:scale-95 ${
+                isIdle
+                  ? 'bg-studio-ink hover:bg-black hover:shadow-xl'
+                  : 'bg-studio-red hover:bg-red-600 hover:shadow-xl'
+              }`}
+            >
+              {isIdle ? (
+                <>
+                  <div className="w-1.5 h-1.5 rounded-full bg-studio-amber animate-pulse" />
+                  Start Capture
+                </>
+              ) : (
+                <>
+                  <div className="w-1.5 h-1.5 rounded-full bg-white animate-ping" />
+                  Finish
+                </>
+              )}
+            </button>
+          </div>
+
+          <p className="text-[10px] font-medium text-studio-ink/30">
+            Pressione{' '}
+            <kbd className="rounded border border-studio-metal bg-white px-2 py-0.5 font-mono text-[10px] text-studio-ink/60 shadow-sm">
+              Alt + Shift + R
+            </kbd>{' '}
+            em qualquer lugar
+          </p>
+        </div>
 
         {showResult && (
-          <div className="w-full space-y-3">
+          <div className="w-full space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-700 ease-out">
 
-            <div className={`bg-white rounded-lg border shadow-sm p-4 transition-all duration-500 ${
-              isProcessing ? 'border-blue-200 border-t-2 border-t-blue-400' : 'border-gray-200'
+            <div className={`relative bg-white/80 rounded-3xl border shadow-studio-glass p-10 transition-all duration-700 ${
+              isProcessing ? 'border-studio-amber/20' : 'border-studio-metal/50'
             }`}>
-              <div className="flex items-center justify-between mb-2">
-                <span className={`text-xs font-medium uppercase tracking-wide ${
-                  isProcessing ? 'text-blue-400' : 'text-gray-400'
-                }`}>
-                  {isProcessing ? (
-                    <span className="inline-flex items-center gap-1.5">
-                      <span className="relative flex h-2 w-2">
-                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75" />
-                        <span className="relative inline-flex rounded-full h-2 w-2 bg-blue-500" />
-                      </span>
-                      Refining
-                    </span>
-                  ) : refinedText && finalText && finalText !== refinedText ? 'Refined' : 'Transcript'}
-                </span>
+              <div className="absolute -top-3 left-10 px-4 py-1 rounded-full bg-studio-ink text-[10px] font-bold uppercase tracking-widest text-white">
+                {isProcessing ? 'Refining with AI...' : refinedText ? 'Studio Refined' : 'Transcription'}
               </div>
-              <p className={`text-sm leading-relaxed whitespace-pre-wrap break-words transition-colors duration-500 ${
-                isProcessing ? 'text-gray-400' : 'text-gray-700'
-              }`}>
-                {refinedText || finalText}
-              </p>
-              {isProcessing && (
-                <div className="mt-3 h-0.5 w-full overflow-hidden rounded-full bg-gray-100">
-                  <div className="h-full w-full animate-pulse rounded-full bg-gradient-to-r from-blue-300 via-blue-500 to-blue-300" />
-                </div>
-              )}
+              
+              <div className="relative">
+                <p className={`transcript-text text-studio-ink transition-all duration-700 ${
+                  isProcessing ? 'opacity-30 blur-[1px] translate-y-1' : 'opacity-100 translate-y-0'
+                }`}>
+                  {refinedText || finalText}
+                </p>
+                
+                {isProcessing && (
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <div className="flex gap-1.5">
+                      <div className="w-1.5 h-1.5 rounded-full bg-studio-amber animate-bounce" />
+                      <div className="w-1.5 h-1.5 rounded-full bg-studio-amber animate-bounce [animation-delay:0.2s]" />
+                      <div className="w-1.5 h-1.5 rounded-full bg-studio-amber animate-bounce [animation-delay:0.4s]" />
+                    </div>
+                  </div>
+                )}
+              </div>
             </div>
 
             {finalText && refinedText && finalText !== refinedText && (
-              <details className="bg-white rounded-lg border border-gray-200 shadow-sm p-4">
-                <summary className="text-xs font-medium text-gray-400 cursor-pointer">
-                  Raw transcript
+              <details className="group">
+                <summary className="text-[10px] font-bold uppercase tracking-widest text-studio-ink/30 cursor-pointer hover:text-studio-ink/60 transition-colors list-none flex items-center gap-2">
+                  <span className="w-4 h-px bg-studio-metal group-open:w-8 transition-all" />
+                  View Original Capture
                 </summary>
-                <p className="mt-2 text-sm text-gray-500 leading-relaxed">{finalText}</p>
+                <div className="mt-4 p-6 rounded-2xl bg-studio-metal/10 border border-studio-metal/20">
+                  <p className="text-xs text-studio-ink/50 leading-relaxed italic">"{finalText}"</p>
+                </div>
               </details>
             )}
 
-            <div className="flex gap-2">
+            <div className="flex items-center justify-center gap-4">
               <button
                 onClick={handleCopy}
                 disabled={!!isProcessing}
-                className="flex items-center gap-1 rounded-md bg-blue-500 px-3 py-1.5 text-xs font-medium text-white hover:bg-blue-600 transition-colors active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed"
+                className="flex items-center gap-2 rounded-full bg-studio-ink px-10 py-3 text-[11px] font-bold uppercase tracking-[0.2em] text-white hover:bg-black transition-all active:scale-95 disabled:opacity-20 disabled:cursor-not-allowed shadow-lg hover:shadow-xl"
               >
-                Copy
+                Copy to Clipboard
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3" />
+                </svg>
               </button>
               <button
                 onClick={() => {
@@ -350,9 +379,9 @@ function App(): React.JSX.Element {
                   if (hasIPC) window.api.setSkillPrompt('')
                 }}
                 disabled={!!isProcessing}
-                className="rounded-md bg-gray-100 px-3 py-1.5 text-xs font-medium text-gray-600 hover:bg-gray-200 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+                className="rounded-full bg-white border border-studio-metal px-8 py-3 text-[11px] font-bold uppercase tracking-[0.2em] text-studio-ink/40 hover:text-studio-ink hover:border-studio-ink transition-all disabled:opacity-20 shadow-sm"
               >
-                Clear
+                Discard
               </button>
             </div>
           </div>
@@ -360,7 +389,6 @@ function App(): React.JSX.Element {
       </div>
 
       {showSkillManager && <SkillManager onClose={() => setShowSkillManager(false)} />}
-      {showSettings && <SettingsPage onClose={() => setShowSettings(false)} />}
     </div>
   )
 }

@@ -10,21 +10,54 @@ export function RecordingOverlay(): React.JSX.Element {
   if (status === 'idle' && !error) return <></>
 
   return (
-    <div className="fixed top-4 right-4 z-50 max-w-md rounded-lg bg-black/80 px-4 py-3 text-white shadow-lg backdrop-blur-sm select-none pointer-events-none animate-in fade-in slide-in-from-top-2 duration-300">
-      <div className="flex flex-col gap-2">
-        <div className="flex items-center gap-3">
-          {error ? (
-            <span className="text-sm text-red-400 font-medium">{error.message}</span>
-          ) : (
-            <>
-              <span className="h-2 w-2 rounded-full bg-red-500 animate-pulse shrink-0" />
-              <span className="text-sm font-medium shrink-0">Recording...</span>
-              <AudioMeter level={audioLevel} />
-            </>
-          )}
+    <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-studio-bg/90 backdrop-blur-md select-none animate-in fade-in duration-500">
+      <div className="flex flex-col items-center gap-12 max-w-lg w-full px-12 text-center pointer-events-auto">
+        
+        {/* The Signal */}
+        <div className="flex flex-col items-center gap-4">
+          <AudioMeter level={audioLevel} isRecording={status === 'recording'} />
+          <div className="flex items-center gap-2 mt-8">
+            <span className={`h-1.5 w-1.5 rounded-full ${error ? 'bg-studio-red' : 'bg-studio-amber'} animate-pulse`} />
+            <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-studio-ink/40">
+              {error ? 'System Error' : status === 'recording' ? 'Capturing Audio' : 'Processing'}
+            </span>
+          </div>
         </div>
-        {interimText && status === 'recording' && (
-          <p className="text-xs text-gray-300 leading-relaxed line-clamp-3">{interimText}</p>
+
+        {/* Interim Result */}
+        {error ? (
+          <p className="text-sm text-studio-red font-medium max-w-sm">{error.message}</p>
+        ) : (
+          <div className="min-h-[100px] flex items-center justify-center">
+            {interimText ? (
+              <p className="transcript-text text-studio-ink opacity-60 italic">
+                "{interimText}"
+              </p>
+            ) : (
+              <p className="text-xs text-studio-ink/20 font-medium">Sua voz aparecerá aqui...</p>
+            )}
+          </div>
+        )}
+
+        {/* Action Button */}
+        <div className="flex flex-col items-center gap-4">
+          <button
+            onClick={() => window.api.stopCapture()}
+            className="group relative flex items-center justify-center"
+          >
+            <div className="absolute inset-0 rounded-full bg-studio-red-glow blur-md group-hover:opacity-40 transition-all scale-150" />
+            <div className="relative h-16 w-16 rounded-full bg-studio-red flex items-center justify-center shadow-lg hover:scale-105 active:scale-95 transition-all">
+              <div className="h-5 w-5 bg-white rounded-sm" />
+            </div>
+          </button>
+          <span className="text-[10px] font-bold uppercase tracking-widest text-studio-red">Parar Gravação</span>
+        </div>
+
+        {/* Tip */}
+        {!error && (
+          <div className="mt-8 px-4 py-2 rounded-full border border-studio-metal/30 bg-white/50">
+             <p className="text-[10px] text-studio-ink/30 font-medium">Use Alt + Shift + R para parar rápido.</p>
+          </div>
         )}
       </div>
     </div>

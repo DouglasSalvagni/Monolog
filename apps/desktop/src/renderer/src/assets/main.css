@@ -1,1 +1,69 @@
 @import 'tailwindcss';
+
+@layer base {
+  :root {
+    /* Studio Focus Palette */
+    --studio-bg: #fcfaf7; /* Soft Parchment */
+    --studio-ink: #1a1c23; /* Onyx Ink */
+    --studio-ink-muted: #64748b;
+    --studio-metal: #e2e8f0;
+    --studio-amber: #f59e0b;
+    --studio-amber-glow: rgba(245, 158, 11, 0.2);
+    --studio-red: #ef4444;
+    --studio-red-glow: rgba(239, 68, 68, 0.2);
+    --studio-glass: rgba(255, 255, 255, 0.7);
+    --studio-glass-border: rgba(0, 0, 0, 0.05);
+
+    background-color: var(--studio-bg);
+    color: var(--studio-ink);
+    font-family: 'Inter', sans-serif;
+  }
+
+  body {
+    @apply antialiased selection:bg-amber-100 selection:text-amber-900;
+  }
+
+  /* Typography for Transcript */
+  .transcript-text {
+    font-family: 'Instrument Serif', serif;
+    @apply text-2xl leading-relaxed tracking-tight;
+  }
+}
+
+@theme {
+  --color-studio-bg: var(--studio-bg);
+  --color-studio-ink: var(--studio-ink);
+  --color-studio-metal: var(--studio-metal);
+  --color-studio-amber: var(--studio-amber);
+  --color-studio-red: var(--studio-red);
+  --color-studio-red-glow: var(--studio-red-glow);
+  
+  --shadow-studio-soft: 0 4px 24px -1px rgba(0, 0, 0, 0.03), 0 2px 8px -1px rgba(0, 0, 0, 0.02);
+  --shadow-studio-glass: 0 8px 32px 0 rgba(0, 0, 0, 0.04);
+}
+
+/* Scrollbar Style */
+::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--studio-metal);
+  border-radius: 10px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--studio-ink-muted);
+}
+
+/* Animations */
+@keyframes ink-ripple {
+  0% { transform: scale(0.95); opacity: 0.8; }
+  50% { transform: scale(1.05); opacity: 0.4; }
+  100% { transform: scale(0.95); opacity: 0.8; }
+}
+
+.animate-ink-pulse {
+  animation: ink-ripple 3s infinite ease-in-out;
+}
