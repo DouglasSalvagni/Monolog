@@ -6,7 +6,7 @@
     "packages/*"
   ],
   "scripts": {
-    "postinstall": "node node_modules/electron/install.js 2>/dev/null || true",
+    "postinstall": "node -e \"const cp = require('child_process'); try { cp.execSync('node node_modules/electron/install.js', { stdio: 'ignore' }); } catch (e) {}\"",
     "dev": "npm run dev -w apps/desktop",
     "build": "npm run build -w apps/desktop",
     "typecheck": "npm run typecheck -w apps/desktop",

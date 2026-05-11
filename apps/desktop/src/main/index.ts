@@ -9,6 +9,8 @@ import { createTray, setTrayIdle, destroyTray } from './tray'
 import { registerShortcuts, unregisterShortcuts } from './shortcuts'
 import { setMainWindow, resetRecording, toggleRecording, initRecording, setSkillPrompt as setRecordingSkillPrompt } from './recording'
 import { initSupabase, signUp, signIn, signOut, restoreSession, onAuthChange, fetchSkills, createSkill, updateSkill, deleteUserSkill } from './supabase'
+import { loadSettings, saveSettings } from './settings'
+import { getDevices, setSelectedDeviceId, getSelectedDeviceId } from './audio-capture'
 
 let mainWindow: BrowserWindow | null = null
 let isQuitting = false
@@ -125,6 +127,27 @@ function registerIpcHandlers(): void {
   ipcMain.handle('skills:delete', async (_event, { id }: { id: string }) => {
     return deleteUserSkill(id)
   })
+
+  ipcMain.handle('audio:get-devices', async () => {
+    const devices = getDevices()
+    return devices
+      .filter((d) => d.maxInputChannels > 0)
+      .map((d) => ({
+        id: d.id,
+        name: d.name,
+        isDefault: d.name.toLowerCase().includes('default')
+      }))
+  })
+
+  ipcMain.handle('audio:get-selected-device', () => {
+    return getSelectedDeviceId()
+  })
+
+  ipcMain.on('audio:set-device', (_event, deviceId: number | null) => {
+    setSelectedDeviceId(deviceId)
+    const settings = loadSettings()
+    saveSettings({ ...settings, selectedDeviceId: deviceId })
+  })
 }
 
 app.whenReady().then(() => {
@@ -135,6 +158,10 @@ app.whenReady().then(() => {
   })
 
   registerIpcHandlers()
+
+  // Load and apply settings
+  const settings = loadSettings()
+  setSelectedDeviceId(settings.selectedDeviceId)
 
   const apiKey = process.env['DEEPGRAM_API_KEY']
   if (!apiKey) {

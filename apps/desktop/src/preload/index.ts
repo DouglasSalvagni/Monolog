@@ -101,7 +101,16 @@ const api = {
     ipcRenderer.invoke('skills:update', { id, data }),
 
   deleteSkill: (id: string): Promise<boolean> =>
-    ipcRenderer.invoke('skills:delete', { id })
+    ipcRenderer.invoke('skills:delete', { id }),
+
+  getAudioDevices: (): Promise<{ id: number; name: string; isDefault: boolean }[]> =>
+    ipcRenderer.invoke('audio:get-devices'),
+
+  getSelectedAudioDevice: (): Promise<number | null> =>
+    ipcRenderer.invoke('audio:get-selected-device'),
+
+  setAudioDevice: (deviceId: number | null): void =>
+    ipcRenderer.send('audio:set-device', deviceId)
 }
 
 if (process.contextIsolated) {

@@ -39,6 +39,15 @@ let levelTimer: ReturnType<typeof setInterval> | null = null
 let safetyTimer: ReturnType<typeof setTimeout> | null = null
 let listener: AudioCaptureListener | null = null
 let lastToggleTime = 0
+let selectedDeviceId: number | null = null
+
+export function setSelectedDeviceId(id: number | null): void {
+  selectedDeviceId = id
+}
+
+export function getSelectedDeviceId(): number | null {
+  return selectedDeviceId
+}
 
 export function setListener(l: AudioCaptureListener | null): void {
   listener = l
@@ -61,12 +70,23 @@ function calcRmsLevel(buf: Buffer): number {
 
 function getInputDeviceId(): number {
   const devices = portAudio.getDevices()
+
+  // Se o usuário escolheu um ID, tenta usar ele se ainda existir
+  if (selectedDeviceId !== null) {
+    const exists = devices.some((d) => d.id === selectedDeviceId && d.maxInputChannels > 0)
+    if (exists) return selectedDeviceId
+  }
+
+  // Fallback: Procura o dispositivo "default"
   for (const d of devices) {
     if (d.maxInputChannels > 0 && d.name.toLowerCase().includes('default')) {
       return d.id
     }
   }
-  return -1
+
+  // Fallback final: Pega o primeiro microfone disponível
+  const firstAvailable = devices.find((d) => d.maxInputChannels > 0)
+  return firstAvailable ? firstAvailable.id : -1
 }
 
 function hasInputDevices(): boolean {
