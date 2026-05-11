@@ -21,6 +21,7 @@ import { initRefine, refineText, cleanupRefine, isRefineAvailable } from './refi
 import { callRefineEdgeFunction } from './supabase'
 
 let mainWindow: BrowserWindow | null = null
+let currentSkillPrompt = ''
 
 export function setMainWindow(win: BrowserWindow | null): void {
   mainWindow = win
@@ -44,13 +45,20 @@ function onInterim(text: string): void {
   send('transcription:interim', { text })
 }
 
+export function setSkillPrompt(prompt: string): void {
+  console.log('[recording] setSkillPrompt:', prompt ? `"${prompt.substring(0, 50)}${prompt.length > 50 ? '...' : ''}"` : '(empty)')
+  currentSkillPrompt = prompt
+}
+
 function onFinal(text: string): void {
   console.log(`[recording] final: "${text}"`)
   send('transcription:final', { text })
 
   const duration = 0
+  const prompt = currentSkillPrompt
+  console.log('[recording] skill prompt for refinement:', prompt ? `"${prompt.substring(0, 50)}${prompt.length > 50 ? '...' : ''}"` : '(none)')
 
-  callRefineEdgeFunction(text, duration)
+  callRefineEdgeFunction(text, duration, prompt || undefined)
     .then(({ refinedText, error: edgeError }) => {
       if (!edgeError && refinedText) {
         console.log('[recording] edge function success:', refinedText)
@@ -60,22 +68,22 @@ function onFinal(text: string): void {
       }
 
       console.log('[recording] edge function failed:', edgeError || 'no result')
-      fallbackRefine(text)
+      fallbackRefine(text, prompt || undefined)
     })
     .catch((err) => {
       console.log('[recording] edge function error, falling back:', err.message)
-      fallbackRefine(text)
+      fallbackRefine(text, prompt || undefined)
     })
 }
 
-function fallbackRefine(text: string): void {
+function fallbackRefine(text: string, skillPrompt?: string): void {
   if (!isRefineAvailable()) {
     clipboard.writeText(text)
     send('transcription:refined', { refined: text })
     return
   }
 
-  refineText(text)
+  refineText(text, skillPrompt)
     .then((refined) => {
       clipboard.writeText(refined)
       console.log(`[recording] local refine: "${refined}"`)

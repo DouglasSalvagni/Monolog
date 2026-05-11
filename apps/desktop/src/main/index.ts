@@ -7,8 +7,8 @@ import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import icon from '../../resources/icon.png?asset'
 import { createTray, setTrayIdle, destroyTray } from './tray'
 import { registerShortcuts, unregisterShortcuts } from './shortcuts'
-import { setMainWindow, resetRecording, toggleRecording, initRecording } from './recording'
-import { initSupabase, signUp, signIn, signOut, restoreSession, onAuthChange } from './supabase'
+import { setMainWindow, resetRecording, toggleRecording, initRecording, setSkillPrompt as setRecordingSkillPrompt } from './recording'
+import { initSupabase, signUp, signIn, signOut, restoreSession, onAuthChange, fetchSkills, createSkill, updateSkill, deleteUserSkill } from './supabase'
 
 let mainWindow: BrowserWindow | null = null
 let isQuitting = false
@@ -103,6 +103,27 @@ function registerIpcHandlers(): void {
   ipcMain.handle('auth:restore-session', async () => {
     const user = await restoreSession()
     return user ? { id: user.id, email: user.email || '' } : null
+  })
+
+  ipcMain.on('refine:set-skill-prompt', (_event, { prompt }: { prompt: string }) => {
+    console.log('[main] received skill prompt:', prompt ? `"${prompt.substring(0, 50)}${prompt.length > 50 ? '...' : ''}"` : '(empty)')
+    setRecordingSkillPrompt(prompt)
+  })
+
+  ipcMain.handle('skills:fetch', async () => {
+    return fetchSkills()
+  })
+
+  ipcMain.handle('skills:create', async (_event, input: { name: string; prompt: string; description?: string }) => {
+    return createSkill(input)
+  })
+
+  ipcMain.handle('skills:update', async (_event, { id, data }: { id: string; data: { name?: string; prompt?: string; description?: string } }) => {
+    return updateSkill(id, data)
+  })
+
+  ipcMain.handle('skills:delete', async (_event, { id }: { id: string }) => {
+    return deleteUserSkill(id)
   })
 }
 

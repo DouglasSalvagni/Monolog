@@ -1,10 +1,13 @@
-import { useEffect, useCallback } from 'react'
+import { useEffect, useCallback, useState } from 'react'
 import { RecordingOverlay } from './components/RecordingOverlay'
 import { LoginScreen } from './components/LoginScreen'
+import { SkillSelector } from './components/SkillSelector'
+import { SkillManager } from './components/SkillManager'
 import { useRecordingStore } from './store/recordingStore'
 import { useAuthStore } from './store/authStore'
 
 function App(): React.JSX.Element {
+  const [showSkillManager, setShowSkillManager] = useState(false)
   const status = useRecordingStore((s) => s.status)
   const startRecording = useRecordingStore((s) => s.startRecording)
   const stopRecording = useRecordingStore((s) => s.stopRecording)
@@ -16,6 +19,8 @@ function App(): React.JSX.Element {
   const clearResult = useRecordingStore((s) => s.clearResult)
   const finalText = useRecordingStore((s) => s.finalText)
   const refinedText = useRecordingStore((s) => s.refinedText)
+  const activeSkill = useRecordingStore((s) => s.activeSkill)
+  const setActiveSkill = useRecordingStore((s) => s.setActiveSkill)
   const isIdle = status === 'idle'
   const isRecording = status === 'recording'
   const hasIPC = typeof window.api?.toggleRecording === 'function'
@@ -201,7 +206,13 @@ function App(): React.JSX.Element {
     }
   }
 
+  useEffect(() => {
+    if (!hasIPC || !activeSkill) return
+    window.api.setSkillPrompt(activeSkill.prompt)
+  }, [activeSkill, hasIPC])
+
   const showResult = isIdle && finalText
+  const isProcessing = showResult && !refinedText
 
   if (authLoading) {
     return (
@@ -223,19 +234,20 @@ function App(): React.JSX.Element {
   }
 
   return (
-    <div className="flex h-screen w-screen select-none flex-col items-center justify-center bg-gray-50">
+    <div className="relative flex h-screen w-screen select-none flex-col items-center justify-center bg-gray-50">
       <RecordingOverlay />
 
+      <div className="absolute right-4 top-4 flex items-center gap-2">
+        <span className="text-xs text-gray-400">{authUser.email}</span>
+        <button
+          onClick={handleLogout}
+          className="text-xs text-gray-400 hover:text-gray-600"
+        >
+          Logout
+        </button>
+      </div>
+
       <div className="flex flex-col items-center gap-6 max-w-2xl w-full px-6">
-        <div className="self-end flex items-center gap-2">
-          <span className="text-xs text-gray-400">{authUser.email}</span>
-          <button
-            onClick={handleLogout}
-            className="text-xs text-gray-400 hover:text-gray-600"
-          >
-            Logout
-          </button>
-        </div>
 
         <h1 className="text-3xl font-bold tracking-tight text-gray-900">Monolog</h1>
 
@@ -253,6 +265,16 @@ function App(): React.JSX.Element {
           </p>
         )}
 
+        <div className="flex items-center justify-center gap-4 w-full max-w-sm">
+          <SkillSelector />
+          <button
+            onClick={() => setShowSkillManager(true)}
+            className="text-xs text-blue-500 hover:text-blue-700 whitespace-nowrap"
+          >
+            Manage Skills
+          </button>
+        </div>
+
         <button
           onClick={handleToggle}
           className={`flex items-center gap-2 rounded-full px-8 py-3 text-sm font-semibold text-white shadow-lg transition-all duration-200 active:scale-95 ${
@@ -267,15 +289,35 @@ function App(): React.JSX.Element {
 
         {showResult && (
           <div className="w-full space-y-3">
-            <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-4">
+
+            <div className={`bg-white rounded-lg border shadow-sm p-4 transition-all duration-500 ${
+              isProcessing ? 'border-blue-200 border-t-2 border-t-blue-400' : 'border-gray-200'
+            }`}>
               <div className="flex items-center justify-between mb-2">
-                <span className="text-xs font-medium text-gray-400 uppercase tracking-wide">
-                  {finalText && refinedText && finalText !== refinedText ? 'Refined' : 'Transcript'}
+                <span className={`text-xs font-medium uppercase tracking-wide ${
+                  isProcessing ? 'text-blue-400' : 'text-gray-400'
+                }`}>
+                  {isProcessing ? (
+                    <span className="inline-flex items-center gap-1.5">
+                      <span className="relative flex h-2 w-2">
+                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75" />
+                        <span className="relative inline-flex rounded-full h-2 w-2 bg-blue-500" />
+                      </span>
+                      Refining
+                    </span>
+                  ) : refinedText && finalText && finalText !== refinedText ? 'Refined' : 'Transcript'}
                 </span>
               </div>
-              <p className="text-sm text-gray-700 leading-relaxed whitespace-pre-wrap break-words">
+              <p className={`text-sm leading-relaxed whitespace-pre-wrap break-words transition-colors duration-500 ${
+                isProcessing ? 'text-gray-400' : 'text-gray-700'
+              }`}>
                 {refinedText || finalText}
               </p>
+              {isProcessing && (
+                <div className="mt-3 h-0.5 w-full overflow-hidden rounded-full bg-gray-100">
+                  <div className="h-full w-full animate-pulse rounded-full bg-gradient-to-r from-blue-300 via-blue-500 to-blue-300" />
+                </div>
+              )}
             </div>
 
             {finalText && refinedText && finalText !== refinedText && (
@@ -290,13 +332,19 @@ function App(): React.JSX.Element {
             <div className="flex gap-2">
               <button
                 onClick={handleCopy}
-                className="flex items-center gap-1 rounded-md bg-blue-500 px-3 py-1.5 text-xs font-medium text-white hover:bg-blue-600 transition-colors active:scale-95"
+                disabled={!!isProcessing}
+                className="flex items-center gap-1 rounded-md bg-blue-500 px-3 py-1.5 text-xs font-medium text-white hover:bg-blue-600 transition-colors active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed"
               >
                 Copy
               </button>
               <button
-                onClick={clearResult}
-                className="rounded-md bg-gray-100 px-3 py-1.5 text-xs font-medium text-gray-600 hover:bg-gray-200 transition-colors"
+                onClick={() => {
+                  clearResult()
+                  setActiveSkill(null)
+                  if (hasIPC) window.api.setSkillPrompt('')
+                }}
+                disabled={!!isProcessing}
+                className="rounded-md bg-gray-100 px-3 py-1.5 text-xs font-medium text-gray-600 hover:bg-gray-200 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
               >
                 Clear
               </button>
@@ -304,6 +352,8 @@ function App(): React.JSX.Element {
           </div>
         )}
       </div>
+
+      {showSkillManager && <SkillManager onClose={() => setShowSkillManager(false)} />}
     </div>
   )
 }

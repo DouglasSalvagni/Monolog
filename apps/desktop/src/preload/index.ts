@@ -86,7 +86,22 @@ const api = {
   logout: (): Promise<void> => ipcRenderer.invoke('auth:logout'),
 
   restoreSession: (): Promise<{ id: string; email: string } | null> =>
-    ipcRenderer.invoke('auth:restore-session')
+    ipcRenderer.invoke('auth:restore-session'),
+
+  setSkillPrompt: (prompt: string): void =>
+    ipcRenderer.send('refine:set-skill-prompt', { prompt }),
+
+  fetchSkills: (): Promise<{ id: string; user_id: string; name: string; prompt: string; description?: string; created_at: string; updated_at: string }[]> =>
+    ipcRenderer.invoke('skills:fetch'),
+
+  createSkill: (input: { name: string; prompt: string; description?: string }): Promise<{ id: string; user_id: string; name: string; prompt: string; description?: string; created_at: string; updated_at: string } | null> =>
+    ipcRenderer.invoke('skills:create', input),
+
+  updateSkill: (id: string, data: { name?: string; prompt?: string; description?: string }): Promise<boolean> =>
+    ipcRenderer.invoke('skills:update', { id, data }),
+
+  deleteSkill: (id: string): Promise<boolean> =>
+    ipcRenderer.invoke('skills:delete', { id })
 }
 
 if (process.contextIsolated) {

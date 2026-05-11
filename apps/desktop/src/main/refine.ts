@@ -21,19 +21,27 @@ export function initRefine(config: { apiKey: string; baseUrl?: string; model?: s
   console.log('[refine] initialized, model:', model, 'base:', config.baseUrl || '(openai)')
 }
 
-export async function refineText(raw: string): Promise<string> {
+export async function refineText(raw: string, skillPrompt?: string): Promise<string> {
   if (!client) {
     throw new Error('Refinement client not initialized')
+  }
+
+  let systemContent: string
+  if (skillPrompt && skillPrompt.trim()) {
+    systemContent = `You are a text refinement assistant. Clean up the transcript (punctuation, capitalization, filler words). Then apply the following user skill instruction to the cleaned text. The skill instruction takes priority over the base cleanup.
+
+Skill instruction: ${skillPrompt.trim()}
+
+Return ONLY the refined text, no explanations.`
+  } else {
+    systemContent =
+      'You are a text refinement assistant. Your job is to clean up speech transcripts. Fix punctuation, capitalization, and remove filler words (um, uh, é, tipo, né, assim). Do NOT add new information, do NOT summarize, do NOT change the meaning. Return ONLY the refined text, no explanations.'
   }
 
   const response = await client.chat.completions.create({
     model,
     messages: [
-      {
-        role: 'system',
-        content:
-          'You are a text refinement assistant. Your job is to clean up speech transcripts. Fix punctuation, capitalization, and remove filler words (um, uh, é, tipo, né, assim). Do NOT add new information, do NOT summarize, do NOT change the meaning. Return ONLY the refined text, no explanations.'
-      },
+      { role: 'system', content: systemContent },
       {
         role: 'user',
         content: `Refine this transcript:\n\n${raw}`

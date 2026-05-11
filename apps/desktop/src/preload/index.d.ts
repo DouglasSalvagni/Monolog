@@ -31,6 +31,11 @@ interface RecordingApi {
   signup: (email: string, password: string) => Promise<AuthResult>
   logout: () => Promise<void>
   restoreSession: () => Promise<{ id: string; email: string } | null>
+  setSkillPrompt: (prompt: string) => void
+  fetchSkills: () => Promise<{ id: string; user_id: string; name: string; prompt: string; description?: string; created_at: string; updated_at: string }[]>
+  createSkill: (input: { name: string; prompt: string; description?: string }) => Promise<{ id: string; user_id: string; name: string; prompt: string; description?: string; created_at: string; updated_at: string } | null>
+  updateSkill: (id: string, data: { name?: string; prompt?: string; description?: string }) => Promise<boolean>
+  deleteSkill: (id: string) => Promise<boolean>
 }
 
 declare global {

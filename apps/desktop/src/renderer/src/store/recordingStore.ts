@@ -7,6 +7,12 @@ interface AudioErrorState {
   code: string
 }
 
+interface ActiveSkill {
+  id: string
+  name: string
+  prompt: string
+}
+
 interface RecordingState {
   status: RecordingStatus
   audioLevel: number
@@ -14,6 +20,7 @@ interface RecordingState {
   finalText: string | null
   refinedText: string | null
   error: AudioErrorState | null
+  activeSkill: ActiveSkill | null
   startRecording: () => void
   stopRecording: () => void
   setAudioLevel: (level: number) => void
@@ -22,6 +29,7 @@ interface RecordingState {
   setRefinedText: (text: string) => void
   clearResult: () => void
   setError: (error: AudioErrorState | null) => void
+  setActiveSkill: (skill: ActiveSkill | null) => void
   resetToIdle: () => void
 }
 
@@ -32,6 +40,7 @@ export const useRecordingStore = create<RecordingState>((set) => ({
   finalText: null,
   refinedText: null,
   error: null,
+  activeSkill: null,
 
   startRecording: () =>
     set({
@@ -56,6 +65,8 @@ export const useRecordingStore = create<RecordingState>((set) => ({
 
   setError: (error: AudioErrorState | null) => set({ error, status: error ? 'idle' : 'idle' }),
 
+  setActiveSkill: (skill: ActiveSkill | null) => set({ activeSkill: skill }),
+
   resetToIdle: () =>
     set({
       status: 'idle',
@@ -63,6 +74,7 @@ export const useRecordingStore = create<RecordingState>((set) => ({
       interimText: '',
       finalText: null,
       refinedText: null,
-      error: null
+      error: null,
+      activeSkill: null
     })
 }))

@@ -126,13 +126,20 @@ export async function restoreSession(): Promise<User | null> {
 
 export async function callRefineEdgeFunction(
   rawText: string,
-  durationSeconds: number
+  durationSeconds: number,
+  skillPrompt?: string
 ): Promise<{ refinedText: string; error?: string }> {
   if (!supabase) return { refinedText: '', error: 'Supabase not initialized' }
 
-  const { data, error } = await supabase.functions.invoke('refine', {
-    body: { rawText, durationSeconds }
-  })
+  const body: Record<string, unknown> = { rawText, durationSeconds }
+  if (skillPrompt) {
+    body.skillPrompt = skillPrompt
+    console.log('[supabase] calling refine with skillPrompt:', skillPrompt.substring(0, 60))
+  } else {
+    console.log('[supabase] calling refine without skillPrompt')
+  }
+
+  const { data, error } = await supabase.functions.invoke('refine', { body })
 
   if (error) return { refinedText: '', error: error.message }
   if (!data.success) return { refinedText: '', error: data.error || 'Unknown error' }
@@ -160,5 +167,51 @@ export async function deleteTranscription(id: string): Promise<boolean> {
   if (!supabase) return false
 
   const { error } = await supabase.from('transcriptions').delete().eq('id', id)
+  return !error
+}
+
+export async function fetchSkills(): Promise<{ id: string; user_id: string; name: string; prompt: string; description?: string; created_at: string; updated_at: string }[]> {
+  if (!supabase) return []
+  const { data } = await supabase
+    .from('user_skills')
+    .select('*')
+    .order('created_at', { ascending: false })
+  return (data as { id: string; user_id: string; name: string; prompt: string; description?: string; created_at: string; updated_at: string }[]) || []
+}
+
+export async function createSkill(input: { name: string; prompt: string; description?: string }): Promise<Record<string, unknown> | null> {
+  if (!supabase) {
+    console.error('[supabase] createSkill: not initialized')
+    return null
+  }
+  const { data: { user }, error: userError } = await supabase.auth.getUser()
+  if (userError || !user) {
+    console.error('[supabase] createSkill: no authenticated user', userError?.message)
+    return null
+  }
+  const { data, error } = await supabase
+    .from('user_skills')
+    .insert({ ...input, user_id: user.id })
+    .select()
+    .single()
+  if (error) {
+    console.error('[supabase] createSkill: insert failed', error.message)
+    return null
+  }
+  return data || null
+}
+
+export async function updateSkill(id: string, data: { name?: string; prompt?: string; description?: string }): Promise<boolean> {
+  if (!supabase) return false
+  const { error } = await supabase
+    .from('user_skills')
+    .update({ ...data, updated_at: new Date().toISOString() })
+    .eq('id', id)
+  return !error
+}
+
+export async function deleteUserSkill(id: string): Promise<boolean> {
+  if (!supabase) return false
+  const { error } = await supabase.from('user_skills').delete().eq('id', id)
   return !error
 }

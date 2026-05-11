@@ -4,6 +4,18 @@ import { corsHeaders, handleCors } from '../_shared/cors.ts'
 interface RefineRequest {
   rawText: string
   durationSeconds?: number
+  skillPrompt?: string
+}
+
+function buildSystemPrompt(skillPrompt?: string): string {
+  if (skillPrompt && skillPrompt.trim()) {
+    return `You are a text refinement assistant. Clean up the transcript (punctuation, capitalization, filler words). Then apply the following user skill instruction to the cleaned text. The skill instruction takes priority over the base cleanup.
+
+Skill instruction: ${skillPrompt.trim()}
+
+Return ONLY the refined text.`
+  }
+  return 'You are a text refinement assistant. Clean up speech transcripts. Fix punctuation, capitalization, and remove filler words (um, uh, é, tipo, né, assim). Do NOT add new information, do NOT summarize. Return ONLY the refined text.'
 }
 
 Deno.serve(async (req: Request) => {
@@ -33,7 +45,7 @@ Deno.serve(async (req: Request) => {
       )
     }
 
-    const { rawText, durationSeconds }: RefineRequest = await req.json()
+    const { rawText, durationSeconds, skillPrompt }: RefineRequest = await req.json()
     if (!rawText) {
       return new Response(
         JSON.stringify({ success: false, error: 'rawText is required' }),
@@ -52,6 +64,8 @@ Deno.serve(async (req: Request) => {
       )
     }
 
+    const systemPrompt = buildSystemPrompt(skillPrompt)
+
     const llmResponse = await fetch(`${baseUrl}/chat/completions`, {
       method: 'POST',
       headers: {
@@ -61,11 +75,7 @@ Deno.serve(async (req: Request) => {
       body: JSON.stringify({
         model,
         messages: [
-          {
-            role: 'system',
-            content:
-              'You are a text refinement assistant. Clean up speech transcripts. Fix punctuation, capitalization, and remove filler words (um, uh, é, tipo, né, assim). Do NOT add new information, do NOT summarize. Return ONLY the refined text.'
-          },
+          { role: 'system', content: systemPrompt },
           { role: 'user', content: `Refine this transcript:\n\n${rawText}` }
         ],
         temperature: 0.3,
