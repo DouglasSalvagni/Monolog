@@ -5,13 +5,18 @@ import { toggleRecording } from './recording'
 let useUiohook = false
 
 export function registerShortcuts(): void {
-  const isWay = process.env.XDG_SESSION_TYPE === 'wayland' || !!process.env.WAYLAND_DISPLAY
+  const isWindows = process.platform === 'win32'
+  const isLinux = process.platform === 'linux'
+  const isWay = isLinux && (process.env.XDG_SESSION_TYPE === 'wayland' || !!process.env.WAYLAND_DISPLAY)
 
-  if (isWay) {
+  // No Windows e Linux (especialmente Wayland), o uiohook é mais confiável que o globalShortcut
+  if (isWindows || isWay) {
     useUiohook = true
-    console.log('[shortcuts] Wayland detected — using uiohook-napi instead of globalShortcut')
+    console.log(`[shortcuts] ${isWindows ? 'Windows' : 'Wayland'} detected — using uiohook-napi`)
 
     uIOhook.on('keydown', (event) => {
+      // No uiohook, verificamos as flags de modificadores
+      // Alt = 18, Shift = 16, R = 19 (os códigos podem variar, mas uiohook-napi tem as constantes)
       if (event.altKey && event.shiftKey && event.keycode === UiohookKey.R) {
         console.log('[shortcuts] Alt+Shift+R detected via uiohook')
         toggleRecording()
@@ -20,19 +25,31 @@ export function registerShortcuts(): void {
 
     try {
       uIOhook.start()
-      console.log('[shortcuts] uiohook started successfully')
+      console.log('[shortcuts] uiohook hook installed')
     } catch (err) {
-      console.error('[shortcuts] uiohook start failed:', err)
+      console.error('[shortcuts] uiohook failed to start:', err)
+      // Se o uiohook falhar, tentamos o globalShortcut como última esperança
+      registerNativeShortcut()
     }
-    return
+  } else {
+    registerNativeShortcut()
   }
+}
 
-  const registered = globalShortcut.register('Alt+Shift+R', () => {
-    toggleRecording()
-  })
+function registerNativeShortcut(): void {
+  try {
+    const registered = globalShortcut.register('Alt+Shift+R', () => {
+      console.log('[shortcuts] Alt+Shift+R detected via globalShortcut')
+      toggleRecording()
+    })
 
-  if (!registered) {
-    console.warn('[shortcuts] Falha ao registrar Alt+Shift+R — atalho pode estar em uso.')
+    if (registered) {
+      console.log('[shortcuts] Alt+Shift+R registered via native globalShortcut')
+    } else {
+      console.warn('[shortcuts] Falha ao registrar Alt+Shift+R nativo — atalho pode estar em uso por outro app.')
+    }
+  } catch (err) {
+    console.error('[shortcuts] Error registering native shortcut:', err)
   }
 }
 
@@ -42,9 +59,8 @@ export function unregisterShortcuts(): void {
       uIOhook.stop()
       console.log('[shortcuts] uiohook stopped')
     } catch (err) {
-      console.error('[shortcuts] uiohook stop failed:', err)
+      // Ignorar erro no stop
     }
-  } else {
-    globalShortcut.unregisterAll()
   }
+  globalShortcut.unregisterAll()
 }
