@@ -36,6 +36,9 @@ interface RecordingApi {
   createSkill: (input: { name: string; prompt: string; description?: string }) => Promise<{ id: string; user_id: string; name: string; prompt: string; description?: string; created_at: string; updated_at: string } | null>
   updateSkill: (id: string, data: { name?: string; prompt?: string; description?: string }) => Promise<boolean>
   deleteSkill: (id: string) => Promise<boolean>
+  getAudioDevices: () => Promise<{ id: number; name: string; isDefault: boolean }[]>
+  getSelectedAudioDevice: () => Promise<number | null>
+  setAudioDevice: (deviceId: number | null) => void
 }
 
 declare global {

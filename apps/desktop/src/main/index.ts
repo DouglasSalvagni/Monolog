@@ -1,9 +1,10 @@
 import { config as dotenvConfig } from 'dotenv'
-dotenvConfig()
-
 import { app, shell, BrowserWindow, ipcMain, clipboard } from 'electron'
-import { join } from 'path'
+import { join, resolve } from 'path'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
+
+const envPath = resolve(__dirname, '../../resources/.env')
+dotenvConfig({ path: envPath })
 import icon from '../../resources/icon.png?asset'
 import { createTray, setTrayIdle, destroyTray } from './tray'
 import { registerShortcuts, unregisterShortcuts } from './shortcuts'
