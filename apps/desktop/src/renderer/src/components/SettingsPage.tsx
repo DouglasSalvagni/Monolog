@@ -148,12 +148,11 @@ export function SettingsPage({ onBack }: SettingsPageProps): React.JSX.Element {
                       </div>
                     ) : (
                       devices.map((device) => {
-                        const isSelected =
-                          selectedId === device.id || (selectedId === null && device.isDefault)
+                        const isSelected = selectedId === device.id || (selectedId === null && device.isDefault)
                         return (
                           <label
                             key={device.id}
-                            className={`group flex cursor-pointer items-center justify-between rounded-2xl border p-6 transition-all ${
+                            className={`group flex cursor-pointer items-center justify-between rounded-2xl border p-6 transition-colors ${
                               isSelected
                                 ? 'border-studio-ink bg-studio-ink text-white shadow-lg'
                                 : 'border-studio-metal/50 bg-white hover:border-studio-ink/30 hover:shadow-studio-soft'
@@ -168,7 +167,7 @@ export function SettingsPage({ onBack }: SettingsPageProps): React.JSX.Element {
                                 onChange={() => handleDeviceChange(device.id)}
                               />
                               <div
-                                className={`w-2 h-2 rounded-full ${isSelected ? 'bg-studio-amber animate-pulse' : 'bg-studio-metal group-hover:bg-studio-ink/30'}`}
+                                className={`w-2 h-2 rounded-full ${isSelected ? 'bg-studio-amber' : 'bg-studio-metal group-hover:bg-studio-ink/30'}`}
                               />
                               <div className="flex flex-col">
                                 <span

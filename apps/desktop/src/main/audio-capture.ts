@@ -74,15 +74,6 @@ function calcRmsLevel(buf: Buffer): number {
   return Math.min(rms / 32768, 1.0)
 }
 
-function shortHostApiLabel(hostAPIName: string): string {
-  if (hostAPIName.includes('WASAPI')) return 'WASAPI'
-  if (hostAPIName.includes('MME')) return 'MME'
-  if (hostAPIName.includes('DirectSound')) return 'DirectSound'
-  if (hostAPIName.includes('WDM')) return 'WDM-KS'
-  if (hostAPIName.includes('ASIO')) return 'ASIO'
-  return hostAPIName
-}
-
 export function getInputDevices(): InputDevice[] {
   const allDevices = portAudio.getDevices()
   const inputOnly = allDevices.filter((d) => d.maxInputChannels > 0)
@@ -91,29 +82,37 @@ export function getInputDevices(): InputDevice[] {
 
   const { HostAPIs, defaultHostAPI } = portAudio.getHostAPIs()
 
-  const defaultInputDeviceId = ((): number | null => {
-    if (HostAPIs.length === 0) return null
-    const defApi = HostAPIs[defaultHostAPI]
-    if (!defApi) return null
-    const defApiDevices = allDevices
-      .filter((d) => d.maxInputChannels > 0 && d.hostAPIName === defApi.name)
-      .sort((a, b) => a.id - b.id)
-    if (defApi.defaultInput >= 0 && defApi.defaultInput < defApiDevices.length) {
-      return defApiDevices[defApi.defaultInput].id
-    }
-    return null
-  })()
+  let targetApi = HostAPIs[defaultHostAPI]
 
-  return inputOnly
-    .map((d) => ({
+  if (!targetApi && HostAPIs.length > 0) {
+    targetApi = HostAPIs[0]
+  }
+
+  if (!targetApi) {
+    return inputOnly.map((d) => ({
       id: d.id,
-      name: `${d.name}  [${shortHostApiLabel(d.hostAPIName)}]`,
-      isDefault: d.id === defaultInputDeviceId
+      name: d.name,
+      isDefault: false
     }))
-    .sort((a, b) => {
-      if (a.isDefault !== b.isDefault) return a.isDefault ? -1 : 1
-      return a.name.localeCompare(b.name)
-    })
+  }
+
+  const apiDevices = inputOnly
+    .filter((d) => d.hostAPIName === targetApi!.name)
+    .sort((a, b) => a.id - b.id)
+
+  let defaultDeviceId: number | null = null
+  if (
+    targetApi.defaultInput >= 0 &&
+    targetApi.defaultInput < apiDevices.length
+  ) {
+    defaultDeviceId = apiDevices[targetApi.defaultInput].id
+  }
+
+  return apiDevices.map((d) => ({
+    id: d.id,
+    name: d.name,
+    isDefault: d.id === defaultDeviceId
+  }))
 }
 
 function getInputDeviceId(): number {
