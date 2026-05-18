@@ -46,7 +46,10 @@ function onInterim(text: string): void {
 }
 
 export function setSkillPrompt(prompt: string): void {
-  console.log('[recording] setSkillPrompt:', prompt ? `"${prompt.substring(0, 50)}${prompt.length > 50 ? '...' : ''}"` : '(empty)')
+  console.log(
+    '[recording] setSkillPrompt:',
+    prompt ? `"${prompt.substring(0, 50)}${prompt.length > 50 ? '...' : ''}"` : '(empty)'
+  )
   currentSkillPrompt = prompt
 }
 
@@ -56,7 +59,10 @@ function onFinal(text: string): void {
 
   const duration = 0
   const prompt = currentSkillPrompt
-  console.log('[recording] skill prompt for refinement:', prompt ? `"${prompt.substring(0, 50)}${prompt.length > 50 ? '...' : ''}"` : '(none)')
+  console.log(
+    '[recording] skill prompt for refinement:',
+    prompt ? `"${prompt.substring(0, 50)}${prompt.length > 50 ? '...' : ''}"` : '(none)'
+  )
 
   callRefineEdgeFunction(text, duration, prompt || undefined)
     .then(({ refinedText, error: edgeError }) => {

@@ -19,6 +19,12 @@ export type AudioCaptureListener = {
   onStop?: () => void
 }
 
+export interface InputDevice {
+  id: number
+  name: string
+  isDefault: boolean
+}
+
 const SAMPLE_RATE = 16000
 const CHANNEL_COUNT = 1
 const SAMPLE_FORMAT = portAudio.SampleFormat16Bit
@@ -68,23 +74,60 @@ function calcRmsLevel(buf: Buffer): number {
   return Math.min(rms / 32768, 1.0)
 }
 
+function shortHostApiLabel(hostAPIName: string): string {
+  if (hostAPIName.includes('WASAPI')) return 'WASAPI'
+  if (hostAPIName.includes('MME')) return 'MME'
+  if (hostAPIName.includes('DirectSound')) return 'DirectSound'
+  if (hostAPIName.includes('WDM')) return 'WDM-KS'
+  if (hostAPIName.includes('ASIO')) return 'ASIO'
+  return hostAPIName
+}
+
+export function getInputDevices(): InputDevice[] {
+  const allDevices = portAudio.getDevices()
+  const inputOnly = allDevices.filter((d) => d.maxInputChannels > 0)
+
+  if (inputOnly.length === 0) return []
+
+  const { HostAPIs, defaultHostAPI } = portAudio.getHostAPIs()
+
+  const defaultInputDeviceId = ((): number | null => {
+    if (HostAPIs.length === 0) return null
+    const defApi = HostAPIs[defaultHostAPI]
+    if (!defApi) return null
+    const defApiDevices = allDevices
+      .filter((d) => d.maxInputChannels > 0 && d.hostAPIName === defApi.name)
+      .sort((a, b) => a.id - b.id)
+    if (defApi.defaultInput >= 0 && defApi.defaultInput < defApiDevices.length) {
+      return defApiDevices[defApi.defaultInput].id
+    }
+    return null
+  })()
+
+  return inputOnly
+    .map((d) => ({
+      id: d.id,
+      name: `${d.name}  [${shortHostApiLabel(d.hostAPIName)}]`,
+      isDefault: d.id === defaultInputDeviceId
+    }))
+    .sort((a, b) => {
+      if (a.isDefault !== b.isDefault) return a.isDefault ? -1 : 1
+      return a.name.localeCompare(b.name)
+    })
+}
+
 function getInputDeviceId(): number {
   const devices = portAudio.getDevices()
 
-  // Se o usuário escolheu um ID, tenta usar ele se ainda existir
   if (selectedDeviceId !== null) {
     const exists = devices.some((d) => d.id === selectedDeviceId && d.maxInputChannels > 0)
     if (exists) return selectedDeviceId
   }
 
-  // Fallback: Procura o dispositivo "default"
-  for (const d of devices) {
-    if (d.maxInputChannels > 0 && d.name.toLowerCase().includes('default')) {
-      return d.id
-    }
-  }
+  const inputDevices = getInputDevices()
+  const defaultDevice = inputDevices.find((d) => d.isDefault)
+  if (defaultDevice) return defaultDevice.id
 
-  // Fallback final: Pega o primeiro microfone disponível
   const firstAvailable = devices.find((d) => d.maxInputChannels > 0)
   return firstAvailable ? firstAvailable.id : -1
 }

@@ -7,7 +7,8 @@ let useUiohook = false
 export function registerShortcuts(): void {
   const isWindows = process.platform === 'win32'
   const isLinux = process.platform === 'linux'
-  const isWay = isLinux && (process.env.XDG_SESSION_TYPE === 'wayland' || !!process.env.WAYLAND_DISPLAY)
+  const isWay =
+    isLinux && (process.env.XDG_SESSION_TYPE === 'wayland' || !!process.env.WAYLAND_DISPLAY)
 
   // No Windows e Linux (especialmente Wayland), o uiohook é mais confiável que o globalShortcut
   if (isWindows || isWay) {
@@ -46,7 +47,9 @@ function registerNativeShortcut(): void {
     if (registered) {
       console.log('[shortcuts] Alt+Shift+R registered via native globalShortcut')
     } else {
-      console.warn('[shortcuts] Falha ao registrar Alt+Shift+R nativo — atalho pode estar em uso por outro app.')
+      console.warn(
+        '[shortcuts] Falha ao registrar Alt+Shift+R nativo — atalho pode estar em uso por outro app.'
+      )
     }
   } catch (err) {
     console.error('[shortcuts] Error registering native shortcut:', err)

@@ -59,7 +59,9 @@ function App(): React.JSX.Element {
         if (result.error) {
           setAuthError(result.error)
         } else if (result.needsEmailConfirmation) {
-          setAuthError('Conta criada! Verifique seu email para confirmar o cadastro antes de fazer login.')
+          setAuthError(
+            'Conta criada! Verifique seu email para confirmar o cadastro antes de fazer login.'
+          )
         } else {
           setUser(result.user)
         }
@@ -253,7 +255,9 @@ function App(): React.JSX.Element {
         </div>
         <div className="flex items-center gap-6">
           <div className="flex flex-col items-end">
-            <span className="text-[10px] font-bold uppercase tracking-wider text-studio-ink/30">Current Account</span>
+            <span className="text-[10px] font-bold uppercase tracking-wider text-studio-ink/30">
+              Current Account
+            </span>
             <span className="text-xs font-medium text-studio-ink/60">{authUser.email}</span>
           </div>
           <div className="flex items-center gap-2 border-l border-studio-metal pl-6">
@@ -262,9 +266,25 @@ function App(): React.JSX.Element {
               className="rounded-full p-2 text-studio-ink/40 hover:bg-white hover:text-studio-ink hover:shadow-studio-soft transition-all active:scale-95"
               title="Configurações"
             >
-              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-                <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="20"
+                height="20"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+                strokeWidth={2}
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"
+                />
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+                />
               </svg>
             </button>
             <button
@@ -278,12 +298,13 @@ function App(): React.JSX.Element {
       </div>
 
       <div className="flex flex-col items-center gap-12 max-w-3xl w-full px-12 pt-24 pb-12">
-
         <div className="flex flex-col items-center gap-4 text-center">
           <p className="text-[11px] font-bold uppercase tracking-[0.3em] text-studio-ink/20">
             Intelligent Speech-to-Text
           </p>
-          <h2 className="text-4xl font-serif italic text-studio-ink">O que você está pensando agora?</h2>
+          <h2 className="text-4xl font-serif italic text-studio-ink">
+            O que você está pensando agora?
+          </h2>
         </div>
 
         <div className="flex flex-col items-center gap-8 w-full">
@@ -322,21 +343,30 @@ function App(): React.JSX.Element {
 
         {showResult && (
           <div className="w-full space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-700 ease-out">
-
-            <div className={`relative bg-white/80 rounded-3xl border shadow-studio-glass p-10 transition-all duration-700 ${
-              isProcessing ? 'border-studio-amber/20' : 'border-studio-metal/50'
-            }`}>
+            <div
+              className={`relative bg-white/80 rounded-3xl border shadow-studio-glass p-10 transition-all duration-700 ${
+                isProcessing ? 'border-studio-amber/20' : 'border-studio-metal/50'
+              }`}
+            >
               <div className="absolute -top-3 left-10 px-4 py-1 rounded-full bg-studio-ink text-[10px] font-bold uppercase tracking-widest text-white">
-                {isProcessing ? 'Refining with AI...' : refinedText ? 'Studio Refined' : 'Transcription'}
+                {isProcessing
+                  ? 'Refining with AI...'
+                  : refinedText
+                    ? 'Studio Refined'
+                    : 'Transcription'}
               </div>
-              
+
               <div className="relative">
-                <p className={`transcript-text text-studio-ink transition-all duration-700 ${
-                  isProcessing ? 'opacity-30 blur-[1px] translate-y-1' : 'opacity-100 translate-y-0'
-                }`}>
+                <p
+                  className={`transcript-text text-studio-ink transition-all duration-700 ${
+                    isProcessing
+                      ? 'opacity-30 blur-[1px] translate-y-1'
+                      : 'opacity-100 translate-y-0'
+                  }`}
+                >
                   {refinedText || finalText}
                 </p>
-                
+
                 {isProcessing && (
                   <div className="absolute inset-0 flex items-center justify-center">
                     <div className="flex gap-1.5">
@@ -368,8 +398,20 @@ function App(): React.JSX.Element {
                 className="flex items-center gap-2 rounded-full bg-studio-ink px-10 py-3 text-[11px] font-bold uppercase tracking-[0.2em] text-white hover:bg-black transition-all active:scale-95 disabled:opacity-20 disabled:cursor-not-allowed shadow-lg hover:shadow-xl"
               >
                 Copy to Clipboard
-                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3" />
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="14"
+                  height="14"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                  strokeWidth={2.5}
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"
+                  />
                 </svg>
               </button>
               <button

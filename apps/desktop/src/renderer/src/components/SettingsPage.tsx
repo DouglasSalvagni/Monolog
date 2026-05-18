@@ -42,7 +42,6 @@ export function SettingsPage({ onBack }: SettingsPageProps): React.JSX.Element {
 
   return (
     <div className="flex h-screen w-screen flex-col bg-studio-bg overflow-hidden animate-in fade-in slide-in-from-right-4 duration-500 ease-out">
-      
       {/* Header */}
       <div className="flex items-center justify-between p-8 z-10">
         <div className="flex items-center gap-6">
@@ -51,7 +50,15 @@ export function SettingsPage({ onBack }: SettingsPageProps): React.JSX.Element {
             className="flex items-center gap-2 text-studio-ink/40 hover:text-studio-ink transition-colors group"
           >
             <div className="p-2 rounded-full border border-studio-metal/30 group-hover:border-studio-ink group-hover:shadow-studio-soft transition-all">
-              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="18"
+                height="18"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+                strokeWidth={2.5}
+              >
                 <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
               </svg>
             </div>
@@ -68,25 +75,45 @@ export function SettingsPage({ onBack }: SettingsPageProps): React.JSX.Element {
           <button
             onClick={() => setActiveTab('audio')}
             className={`flex items-center gap-4 px-6 py-4 rounded-2xl text-xs font-bold uppercase tracking-widest transition-all ${
-              activeTab === 'audio' 
-                ? 'bg-studio-ink text-white shadow-lg' 
+              activeTab === 'audio'
+                ? 'bg-studio-ink text-white shadow-lg'
                 : 'text-studio-ink/40 hover:text-studio-ink hover:bg-white/50'
             }`}
           >
-             <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-20a3 3 0 013 3v10a3 3 0 01-3 33 3 0 01-3-3V4a3 3 0 013-3z" />
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="18"
+              height="18"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              strokeWidth={2}
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-20a3 3 0 013 3v10a3 3 0 01-3 33 3 0 01-3-3V4a3 3 0 013-3z"
+              />
             </svg>
             Hardware de Áudio
           </button>
           <button
             onClick={() => setActiveTab('skills')}
             className={`flex items-center gap-4 px-6 py-4 rounded-2xl text-xs font-bold uppercase tracking-widest transition-all ${
-              activeTab === 'skills' 
-                ? 'bg-studio-ink text-white shadow-lg' 
+              activeTab === 'skills'
+                ? 'bg-studio-ink text-white shadow-lg'
                 : 'text-studio-ink/40 hover:text-studio-ink hover:bg-white/50'
             }`}
           >
-            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="18"
+              height="18"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              strokeWidth={2}
+            >
               <path strokeLinecap="round" strokeLinejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" />
             </svg>
             Habilidades de IA
@@ -95,17 +122,23 @@ export function SettingsPage({ onBack }: SettingsPageProps): React.JSX.Element {
 
         {/* Content Canvas */}
         <div className="flex-1 bg-white/60 rounded-[32px] border border-studio-metal/50 shadow-studio-glass backdrop-blur-sm overflow-hidden flex flex-col">
-          <div className="p-10 flex-1 overflow-y-auto">
+          <div className="p-10 flex-1 overflow-y-auto min-h-0">
             {activeTab === 'audio' && (
               <div className="max-w-xl animate-in fade-in slide-in-from-bottom-4 duration-500">
                 <div className="mb-8">
-                  <h3 className="text-xl font-serif text-studio-ink mb-2">Dispositivos de Entrada</h3>
-                  <p className="text-xs text-studio-ink/40">Selecione o microfone que o Studio deve utilizar para captura.</p>
+                  <h3 className="text-xl font-serif text-studio-ink mb-2">
+                    Dispositivos de Entrada
+                  </h3>
+                  <p className="text-xs text-studio-ink/40">
+                    Selecione o microfone que o Studio deve utilizar para captura.
+                  </p>
                 </div>
 
                 {loading ? (
                   <div className="space-y-4 animate-pulse">
-                    {[1,2,3].map(i => <div key={i} className="h-20 bg-studio-metal/20 rounded-2xl" />)}
+                    {[1, 2, 3].map((i) => (
+                      <div key={i} className="h-20 bg-studio-metal/20 rounded-2xl" />
+                    ))}
                   </div>
                 ) : (
                   <div className="grid gap-3">
@@ -115,7 +148,8 @@ export function SettingsPage({ onBack }: SettingsPageProps): React.JSX.Element {
                       </div>
                     ) : (
                       devices.map((device) => {
-                        const isSelected = selectedId === device.id || (selectedId === null && device.isDefault)
+                        const isSelected =
+                          selectedId === device.id || (selectedId === null && device.isDefault)
                         return (
                           <label
                             key={device.id}
@@ -133,11 +167,19 @@ export function SettingsPage({ onBack }: SettingsPageProps): React.JSX.Element {
                                 checked={isSelected}
                                 onChange={() => handleDeviceChange(device.id)}
                               />
-                              <div className={`w-2 h-2 rounded-full ${isSelected ? 'bg-studio-amber animate-pulse' : 'bg-studio-metal group-hover:bg-studio-ink/30'}`} />
+                              <div
+                                className={`w-2 h-2 rounded-full ${isSelected ? 'bg-studio-amber animate-pulse' : 'bg-studio-metal group-hover:bg-studio-ink/30'}`}
+                              />
                               <div className="flex flex-col">
-                                <span className={`text-sm font-bold ${isSelected ? 'text-white' : 'text-studio-ink'}`}>{device.name}</span>
+                                <span
+                                  className={`text-sm font-bold ${isSelected ? 'text-white' : 'text-studio-ink'}`}
+                                >
+                                  {device.name}
+                                </span>
                                 {device.isDefault && (
-                                  <span className={`text-[9px] font-bold uppercase tracking-wider ${isSelected ? 'text-studio-amber' : 'text-studio-ink/30'}`}>
+                                  <span
+                                    className={`text-[9px] font-bold uppercase tracking-wider ${isSelected ? 'text-studio-amber' : 'text-studio-ink/30'}`}
+                                  >
                                     Padrão do Sistema
                                   </span>
                                 )}
@@ -145,7 +187,9 @@ export function SettingsPage({ onBack }: SettingsPageProps): React.JSX.Element {
                             </div>
                             {isSelected && (
                               <div className="bg-studio-amber/20 px-3 py-1 rounded-full">
-                                <span className="text-[9px] font-bold text-studio-amber uppercase">Active Signal</span>
+                                <span className="text-[9px] font-bold text-studio-amber uppercase">
+                                  Active Signal
+                                </span>
                               </div>
                             )}
                           </label>
@@ -161,7 +205,9 @@ export function SettingsPage({ onBack }: SettingsPageProps): React.JSX.Element {
               <div className="h-full animate-in fade-in slide-in-from-bottom-4 duration-500">
                 <div className="mb-8">
                   <h3 className="text-xl font-serif text-studio-ink mb-2">Habilidades de IA</h3>
-                  <p className="text-xs text-studio-ink/40">Configure prompts e comportamentos para o refinamento de texto.</p>
+                  <p className="text-xs text-studio-ink/40">
+                    Configure prompts e comportamentos para o refinamento de texto.
+                  </p>
                 </div>
                 <SkillManager embedded />
               </div>

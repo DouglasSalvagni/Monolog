@@ -7,26 +7,26 @@ export function AudioMeter({ level, isRecording = false }: AudioMeterProps): Rea
   // Escalar o nível para um valor mais visível
   const scale = 1 + level * 2
   const opacity = 0.4 + level * 0.6
-  
+
   return (
     <div className="relative flex items-center justify-center w-24 h-24">
       {/* Outer Glow / Pulse */}
-      <div 
+      <div
         className={`absolute inset-0 rounded-full blur-xl transition-all duration-300 ${
           isRecording ? 'bg-studio-amber' : 'bg-studio-ink/10'
         }`}
-        style={{ 
+        style={{
           transform: `scale(${scale * 1.2})`,
           opacity: isRecording ? opacity * 0.3 : 0
         }}
       />
-      
+
       {/* The Core Orb (Ink Pulse) */}
-      <div 
+      <div
         className={`relative w-4 h-4 rounded-full transition-all duration-150 ease-out shadow-studio-soft ${
           isRecording ? 'bg-studio-amber' : 'bg-studio-ink'
         }`}
-        style={{ 
+        style={{
           transform: `scale(${scale})`,
           opacity: isRecording ? 1 : 0.8
         }}

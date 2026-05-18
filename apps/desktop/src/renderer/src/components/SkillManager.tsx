@@ -5,8 +5,15 @@ import type { SkillData } from '@monolog/shared'
 
 type ViewMode = 'list' | 'create' | 'edit'
 
-export function SkillManager({ onClose, embedded = false }: { onClose?: () => void; embedded?: boolean }): React.JSX.Element {
-  const { skills, loading, error, fetchSkills, createSkill, updateSkill, deleteSkill } = useSkillStore()
+export function SkillManager({
+  onClose,
+  embedded = false
+}: {
+  onClose?: () => void
+  embedded?: boolean
+}): React.JSX.Element {
+  const { skills, loading, error, fetchSkills, createSkill, updateSkill, deleteSkill } =
+    useSkillStore()
   const [mode, setMode] = useState<ViewMode>('list')
   const [editingSkill, setEditingSkill] = useState<SkillData | null>(null)
   const [saving, setSaving] = useState(false)
@@ -15,14 +22,22 @@ export function SkillManager({ onClose, embedded = false }: { onClose?: () => vo
     fetchSkills()
   }, [fetchSkills])
 
-  const handleCreate = async (data: { name: string; prompt: string; description?: string }): Promise<void> => {
+  const handleCreate = async (data: {
+    name: string
+    prompt: string
+    description?: string
+  }): Promise<void> => {
     setSaving(true)
     const skill = await createSkill(data)
     setSaving(false)
     if (skill) setMode('list')
   }
 
-  const handleUpdate = async (data: { name: string; prompt: string; description?: string }): Promise<void> => {
+  const handleUpdate = async (data: {
+    name: string
+    prompt: string
+    description?: string
+  }): Promise<void> => {
     if (!editingSkill) return
     setSaving(true)
     await updateSkill(editingSkill.id, data)
@@ -38,9 +53,7 @@ export function SkillManager({ onClose, embedded = false }: { onClose?: () => vo
 
   const content = (
     <>
-      {error && (
-        <p className="text-xs text-red-500 mb-3">{error}</p>
-      )}
+      {error && <p className="text-xs text-red-500 mb-3">{error}</p>}
 
       {mode === 'list' && (
         <div className="space-y-2">
@@ -57,10 +70,7 @@ export function SkillManager({ onClose, embedded = false }: { onClose?: () => vo
             <p className="text-xs text-gray-400 text-center py-4">No skills yet. Create one!</p>
           ) : (
             skills.map((skill) => (
-              <div
-                key={skill.id}
-                className="rounded-md border border-gray-200 p-3 bg-white"
-              >
+              <div key={skill.id} className="rounded-md border border-gray-200 p-3 bg-white">
                 <div className="flex items-start justify-between">
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-medium text-gray-800 truncate">{skill.name}</p>
@@ -71,7 +81,10 @@ export function SkillManager({ onClose, embedded = false }: { onClose?: () => vo
                   </div>
                   <div className="flex gap-1 ml-2 shrink-0">
                     <button
-                      onClick={() => { setEditingSkill(skill); setMode('edit') }}
+                      onClick={() => {
+                        setEditingSkill(skill)
+                        setMode('edit')
+                      }}
                       className="text-xs text-blue-500 hover:text-blue-700"
                     >
                       Edit
@@ -96,7 +109,10 @@ export function SkillManager({ onClose, embedded = false }: { onClose?: () => vo
           initialPrompt={editingSkill?.prompt}
           initialDescription={editingSkill?.description}
           onSave={mode === 'create' ? handleCreate : handleUpdate}
-          onCancel={() => { setEditingSkill(null); setMode('list') }}
+          onCancel={() => {
+            setEditingSkill(null)
+            setMode('list')
+          }}
           saving={saving}
         />
       )}
@@ -119,9 +135,7 @@ export function SkillManager({ onClose, embedded = false }: { onClose?: () => vo
           </button>
         </div>
 
-        <div className="p-4 overflow-y-auto flex-1 bg-gray-50/30">
-          {content}
-        </div>
+        <div className="p-4 overflow-y-auto flex-1 bg-gray-50/30">{content}</div>
       </div>
     </div>
   )

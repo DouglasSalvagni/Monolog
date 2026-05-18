@@ -68,7 +68,9 @@ const api = {
 
   stopCapture: (): void => ipcRenderer.send('audio:stop-capture'),
 
-  onAuthStateChanged: (callback: (user: { id: string; email: string } | null) => void): (() => void) => {
+  onAuthStateChanged: (
+    callback: (user: { id: string; email: string } | null) => void
+  ): (() => void) => {
     const handler = (
       _event: Electron.IpcRendererEvent,
       user: { id: string; email: string } | null
@@ -77,10 +79,16 @@ const api = {
     return () => ipcRenderer.removeListener('auth:state-changed', handler)
   },
 
-  login: (email: string, password: string): Promise<{ user: { id: string; email: string } | null; error?: string }> =>
+  login: (
+    email: string,
+    password: string
+  ): Promise<{ user: { id: string; email: string } | null; error?: string }> =>
     ipcRenderer.invoke('auth:login', { email, password }),
 
-  signup: (email: string, password: string): Promise<{ user: { id: string; email: string } | null; error?: string }> =>
+  signup: (
+    email: string,
+    password: string
+  ): Promise<{ user: { id: string; email: string } | null; error?: string }> =>
     ipcRenderer.invoke('auth:signup', { email, password }),
 
   logout: (): Promise<void> => ipcRenderer.invoke('auth:logout'),
@@ -88,20 +96,40 @@ const api = {
   restoreSession: (): Promise<{ id: string; email: string } | null> =>
     ipcRenderer.invoke('auth:restore-session'),
 
-  setSkillPrompt: (prompt: string): void =>
-    ipcRenderer.send('refine:set-skill-prompt', { prompt }),
+  setSkillPrompt: (prompt: string): void => ipcRenderer.send('refine:set-skill-prompt', { prompt }),
 
-  fetchSkills: (): Promise<{ id: string; user_id: string; name: string; prompt: string; description?: string; created_at: string; updated_at: string }[]> =>
-    ipcRenderer.invoke('skills:fetch'),
+  fetchSkills: (): Promise<
+    {
+      id: string
+      user_id: string
+      name: string
+      prompt: string
+      description?: string
+      created_at: string
+      updated_at: string
+    }[]
+  > => ipcRenderer.invoke('skills:fetch'),
 
-  createSkill: (input: { name: string; prompt: string; description?: string }): Promise<{ id: string; user_id: string; name: string; prompt: string; description?: string; created_at: string; updated_at: string } | null> =>
-    ipcRenderer.invoke('skills:create', input),
+  createSkill: (input: {
+    name: string
+    prompt: string
+    description?: string
+  }): Promise<{
+    id: string
+    user_id: string
+    name: string
+    prompt: string
+    description?: string
+    created_at: string
+    updated_at: string
+  } | null> => ipcRenderer.invoke('skills:create', input),
 
-  updateSkill: (id: string, data: { name?: string; prompt?: string; description?: string }): Promise<boolean> =>
-    ipcRenderer.invoke('skills:update', { id, data }),
+  updateSkill: (
+    id: string,
+    data: { name?: string; prompt?: string; description?: string }
+  ): Promise<boolean> => ipcRenderer.invoke('skills:update', { id, data }),
 
-  deleteSkill: (id: string): Promise<boolean> =>
-    ipcRenderer.invoke('skills:delete', { id }),
+  deleteSkill: (id: string): Promise<boolean> => ipcRenderer.invoke('skills:delete', { id }),
 
   getAudioDevices: (): Promise<{ id: number; name: string; isDefault: boolean }[]> =>
     ipcRenderer.invoke('audio:get-devices'),
@@ -109,8 +137,7 @@ const api = {
   getSelectedAudioDevice: (): Promise<number | null> =>
     ipcRenderer.invoke('audio:get-selected-device'),
 
-  setAudioDevice: (deviceId: number | null): void =>
-    ipcRenderer.send('audio:set-device', deviceId)
+  setAudioDevice: (deviceId: number | null): void => ipcRenderer.send('audio:set-device', deviceId)
 }
 
 if (process.contextIsolated) {

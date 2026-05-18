@@ -74,7 +74,10 @@ export function onAuthChange(callback: (user: User | null) => void): void {
   authCallback = callback
 }
 
-export async function signUp(email: string, password: string): Promise<{
+export async function signUp(
+  email: string,
+  password: string
+): Promise<{
   user: User | null
   error?: string
   needsEmailConfirmation?: boolean
@@ -91,7 +94,10 @@ export async function signUp(email: string, password: string): Promise<{
   return { user: data.user }
 }
 
-export async function signIn(email: string, password: string): Promise<{
+export async function signIn(
+  email: string,
+  password: string
+): Promise<{
   user: User | null
   error?: string
 }> {
@@ -170,21 +176,48 @@ export async function deleteTranscription(id: string): Promise<boolean> {
   return !error
 }
 
-export async function fetchSkills(): Promise<{ id: string; user_id: string; name: string; prompt: string; description?: string; created_at: string; updated_at: string }[]> {
+export async function fetchSkills(): Promise<
+  {
+    id: string
+    user_id: string
+    name: string
+    prompt: string
+    description?: string
+    created_at: string
+    updated_at: string
+  }[]
+> {
   if (!supabase) return []
   const { data } = await supabase
     .from('user_skills')
     .select('*')
     .order('created_at', { ascending: false })
-  return (data as { id: string; user_id: string; name: string; prompt: string; description?: string; created_at: string; updated_at: string }[]) || []
+  return (
+    (data as {
+      id: string
+      user_id: string
+      name: string
+      prompt: string
+      description?: string
+      created_at: string
+      updated_at: string
+    }[]) || []
+  )
 }
 
-export async function createSkill(input: { name: string; prompt: string; description?: string }): Promise<Record<string, unknown> | null> {
+export async function createSkill(input: {
+  name: string
+  prompt: string
+  description?: string
+}): Promise<Record<string, unknown> | null> {
   if (!supabase) {
     console.error('[supabase] createSkill: not initialized')
     return null
   }
-  const { data: { user }, error: userError } = await supabase.auth.getUser()
+  const {
+    data: { user },
+    error: userError
+  } = await supabase.auth.getUser()
   if (userError || !user) {
     console.error('[supabase] createSkill: no authenticated user', userError?.message)
     return null
@@ -201,7 +234,10 @@ export async function createSkill(input: { name: string; prompt: string; descrip
   return data || null
 }
 
-export async function updateSkill(id: string, data: { name?: string; prompt?: string; description?: string }): Promise<boolean> {
+export async function updateSkill(
+  id: string,
+  data: { name?: string; prompt?: string; description?: string }
+): Promise<boolean> {
   if (!supabase) return false
   const { error } = await supabase
     .from('user_skills')

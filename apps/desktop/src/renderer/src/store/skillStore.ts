@@ -8,7 +8,10 @@ interface SkillStoreState {
   error: string | null
   fetchSkills: () => Promise<void>
   createSkill: (input: CreateSkillInput) => Promise<SkillData | null>
-  updateSkill: (id: string, data: Partial<Pick<SkillData, 'name' | 'prompt' | 'description'>>) => Promise<void>
+  updateSkill: (
+    id: string,
+    data: Partial<Pick<SkillData, 'name' | 'prompt' | 'description'>>
+  ) => Promise<void>
   deleteSkill: (id: string) => Promise<void>
 }
 

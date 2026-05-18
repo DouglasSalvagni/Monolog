@@ -9,17 +9,32 @@ interface SkillFormProps {
   saving?: boolean
 }
 
-export function SkillForm({ initialName, initialPrompt, initialDescription, onSave, onCancel, saving }: SkillFormProps): React.JSX.Element {
+export function SkillForm({
+  initialName,
+  initialPrompt,
+  initialDescription,
+  onSave,
+  onCancel,
+  saving
+}: SkillFormProps): React.JSX.Element {
   const [name, setName] = useState(initialName || '')
   const [prompt, setPrompt] = useState(initialPrompt || '')
   const [description, setDescription] = useState(initialDescription || '')
 
-  const canSave = name.trim().length > 0 && name.trim().length <= 100 && prompt.trim().length > 0 && prompt.trim().length <= 2000
+  const canSave =
+    name.trim().length > 0 &&
+    name.trim().length <= 100 &&
+    prompt.trim().length > 0 &&
+    prompt.trim().length <= 2000
 
   const handleSubmit = (e: React.FormEvent): void => {
     e.preventDefault()
     if (!canSave) return
-    onSave({ name: name.trim(), prompt: prompt.trim(), description: description.trim() || undefined })
+    onSave({
+      name: name.trim(),
+      prompt: prompt.trim(),
+      description: description.trim() || undefined
+    })
   }
 
   return (

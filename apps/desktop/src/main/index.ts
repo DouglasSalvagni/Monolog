@@ -8,10 +8,27 @@ dotenvConfig({ path: envPath })
 import icon from '../../resources/icon.png?asset'
 import { createTray, setTrayIdle, destroyTray } from './tray'
 import { registerShortcuts, unregisterShortcuts } from './shortcuts'
-import { setMainWindow, resetRecording, toggleRecording, initRecording, setSkillPrompt as setRecordingSkillPrompt } from './recording'
-import { initSupabase, signUp, signIn, signOut, restoreSession, onAuthChange, fetchSkills, createSkill, updateSkill, deleteUserSkill } from './supabase'
+import {
+  setMainWindow,
+  resetRecording,
+  toggleRecording,
+  initRecording,
+  setSkillPrompt as setRecordingSkillPrompt
+} from './recording'
+import {
+  initSupabase,
+  signUp,
+  signIn,
+  signOut,
+  restoreSession,
+  onAuthChange,
+  fetchSkills,
+  createSkill,
+  updateSkill,
+  deleteUserSkill
+} from './supabase'
 import { loadSettings, saveSettings } from './settings'
-import { getDevices, setSelectedDeviceId, getSelectedDeviceId } from './audio-capture'
+import { getInputDevices, setSelectedDeviceId, getSelectedDeviceId } from './audio-capture'
 
 let mainWindow: BrowserWindow | null = null
 let isQuitting = false
@@ -86,18 +103,24 @@ function registerIpcHandlers(): void {
     toggleRecording()
   })
 
-  ipcMain.handle('auth:login', async (_event, { email, password }: { email: string; password: string }) => {
-    return signIn(email, password)
-  })
-
-  ipcMain.handle('auth:signup', async (_event, { email, password }: { email: string; password: string }) => {
-    const result = await signUp(email, password)
-    return {
-      user: result.user ? { id: result.user.id, email: result.user.email || '' } : null,
-      error: result.error,
-      needsEmailConfirmation: result.needsEmailConfirmation
+  ipcMain.handle(
+    'auth:login',
+    async (_event, { email, password }: { email: string; password: string }) => {
+      return signIn(email, password)
     }
-  })
+  )
+
+  ipcMain.handle(
+    'auth:signup',
+    async (_event, { email, password }: { email: string; password: string }) => {
+      const result = await signUp(email, password)
+      return {
+        user: result.user ? { id: result.user.id, email: result.user.email || '' } : null,
+        error: result.error,
+        needsEmailConfirmation: result.needsEmailConfirmation
+      }
+    }
+  )
 
   ipcMain.handle('auth:logout', async () => {
     await signOut()
@@ -109,7 +132,10 @@ function registerIpcHandlers(): void {
   })
 
   ipcMain.on('refine:set-skill-prompt', (_event, { prompt }: { prompt: string }) => {
-    console.log('[main] received skill prompt:', prompt ? `"${prompt.substring(0, 50)}${prompt.length > 50 ? '...' : ''}"` : '(empty)')
+    console.log(
+      '[main] received skill prompt:',
+      prompt ? `"${prompt.substring(0, 50)}${prompt.length > 50 ? '...' : ''}"` : '(empty)'
+    )
     setRecordingSkillPrompt(prompt)
   })
 
@@ -117,27 +143,29 @@ function registerIpcHandlers(): void {
     return fetchSkills()
   })
 
-  ipcMain.handle('skills:create', async (_event, input: { name: string; prompt: string; description?: string }) => {
-    return createSkill(input)
-  })
+  ipcMain.handle(
+    'skills:create',
+    async (_event, input: { name: string; prompt: string; description?: string }) => {
+      return createSkill(input)
+    }
+  )
 
-  ipcMain.handle('skills:update', async (_event, { id, data }: { id: string; data: { name?: string; prompt?: string; description?: string } }) => {
-    return updateSkill(id, data)
-  })
+  ipcMain.handle(
+    'skills:update',
+    async (
+      _event,
+      { id, data }: { id: string; data: { name?: string; prompt?: string; description?: string } }
+    ) => {
+      return updateSkill(id, data)
+    }
+  )
 
   ipcMain.handle('skills:delete', async (_event, { id }: { id: string }) => {
     return deleteUserSkill(id)
   })
 
   ipcMain.handle('audio:get-devices', async () => {
-    const devices = getDevices()
-    return devices
-      .filter((d) => d.maxInputChannels > 0)
-      .map((d) => ({
-        id: d.id,
-        name: d.name,
-        isDefault: d.name.toLowerCase().includes('default')
-      }))
+    return getInputDevices()
   })
 
   ipcMain.handle('audio:get-selected-device', () => {
